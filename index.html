@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nanatsukaze - 音乐播放器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- 播放器区域 -->
+    <div class="player-section">
+      <div class="cover-wrap">
+        <div id="player" class="youtube-player"></div>
+        <div class="cover-overlay"></div>
+      </div>
+      <div class="song-info">
+        <h1 id="songTitle">—</h1>
+        <p id="songArtist">Nanatsukaze</p>
+      </div>
+      <div class="progress-wrap">
+        <span id="currentTime">0:00</span>
+        <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1">
+        <span id="totalTime">0:00</span>
+      </div>
+      <div class="controls">
+        <button id="shuffleBtn" class="ctrl-btn small" title="随机播放">🔀</button>
+        <button id="prevBtn" class="ctrl-btn" title="上一首">⏮</button>
+        <button id="playBtn" class="ctrl-btn primary" title="播放/暂停">▶</button>
+        <button id="nextBtn" class="ctrl-btn" title="下一首">⏭</button>
+        <button id="repeatBtn" class="ctrl-btn small" title="循环模式">🔁</button>
+      </div>
+      <div class="volume-wrap">
+        <span>🔊</span>
+        <input type="range" id="volumeBar" min="0" max="100" value="80">
+      </div>
+    </div>
+
+    <!-- 播放列表 -->
+    <div class="playlist-section">
+      <h2>播放列表</h2>
+      <ul id="playlist"></ul>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
