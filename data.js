@@ -14,7 +14,7 @@ const songs = [
   { title: "Hazy Moon Night", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/svhAjo4X0yc" },
   { title: "Dream Gravity", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=1TaEXrdCp6A" },
   { title: "Save Our Sound", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=2YrkJsR83S8" },
-  { title: "Goodbye Wonderland", artist: "Nanatsukaze", youtubeLink: "" },
+  { title: "Goodbye Wonderland", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/I-ea4Opix3E?si=yU5NyqxxgCTQiNkZ" },
   { title: "Flying Cat", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=EQgHnfXAMBY" },
   { title: "Soramimi", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/vJDxS_ovbpc?si=73uLPeCfvWZXYw3n" },
   { title: "May Cat", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/live/xYXIh06fV_w" },
@@ -22,5 +22,4 @@ const songs = [
   { title: "Sakura Rain", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/4sKjn3ryB14?si=_iAJLjZrofWx_pHS" },
   { title: "Messiah", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/sX-7C9Xlw0Y?si=7iZekbwrHmWk9YPN" },
   { title: "Needle of Words", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=e9P3iVG5Lxs" },
-  { title: "Besieged on All Sides", artist: "Nanatsukaze", youtubeLink: "" }
 ];
