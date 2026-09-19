@@ -130,7 +130,6 @@ function renderGallery() {
     grid.appendChild(card);
   });
 
-  // Show "no results" message when search matches nothing
   if (visibleCount === 0 && q) {
     const msg = document.createElement('div');
     msg.className = 'no-results';
@@ -209,7 +208,6 @@ function onPlayerReady() {
 }
 
 function onPlayerError(event) {
-  // 2 = invalid param, 5 = HTML5 error, 100 = not found, 101/150 = embed not allowed
   console.warn('YouTube player error:', event.data);
   const song = songs[currentIndex];
   const titleEl = document.getElementById('songTitle');
@@ -426,7 +424,6 @@ function bindEvents() {
     renderGallery();
   });
 
-  // Press Enter → blur input to close the on-screen keyboard (mobile/iPad)
   searchInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' || e.keyCode === 13) {
       e.preventDefault();
@@ -434,7 +431,7 @@ function bindEvents() {
     }
   });
 
-  // ===== Mini-player interactions =====
+  // ===== Mini-player =====
   miniPlayer.addEventListener('click', function (e) {
     if (e.target.closest('#miniPlayBtn')) return;
     showPlayer();
@@ -466,22 +463,37 @@ renderGallery();
 renderPlaylist();
 updateSongInfo();
 
-
 // =================================================================
-// Futuristic animated background — particle network
+// Futuristic animated background — full effects, optimized pipeline
 // =================================================================
 (function initBackgroundParticles() {
   const canvas = document.getElementById('bgCanvas');
   if (!canvas) return;
-
-  // Respect users who disabled animations
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+
   let particles = [];
   let w = 0, h = 0, dpr = 1;
   let rafId = null;
   let running = false;
+  let lastFrameTime = 0;
+  let lastTimestamp = 0;
+
+  const FRAME_INTERVAL = 1000 / 60;
+  const MAX_DIST = 140;
+  const MAX_DIST_SQ = MAX_DIST * MAX_DIST;
+  const CELL = MAX_DIST;
+  const ALPHA_BUCKETS = 6;
+
+  const grid = new Map();
+
+  const NEIGHBOR_OFFSETS = [];
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      NEIGHBOR_OFFSETS.push([dx, dy]);
+    }
+  }
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -493,7 +505,6 @@ updateSongInfo();
     canvas.style.height = h + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Density: 1 particle per ~22000 px², min 20, max 80
     const target = Math.min(Math.max(20, Math.floor((w * h) / 22000)), 80);
     particles = [];
     for (let i = 0; i < target; i++) {
@@ -503,52 +514,109 @@ updateSongInfo();
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
         r: Math.random() * 1.6 + 0.7,
-        hue: [260, 220, 330][Math.floor(Math.random() * 3)],
+        hue: [260, 220, 330][(Math.random() * 3) | 0],
         alpha: Math.random() * 0.4 + 0.35
       });
     }
   }
 
-  function draw() {
+  function draw(timestamp) {
     if (!running) return;
+
+    if (timestamp - lastFrameTime < FRAME_INTERVAL) {
+      rafId = requestAnimationFrame(draw);
+      return;
+    }
+    const dt = lastTimestamp
+      ? Math.min((timestamp - lastTimestamp) / 16.667, 3)
+      : 1;
+    lastFrameTime = timestamp;
+    lastTimestamp = timestamp;
+
     ctx.clearRect(0, 0, w, h);
 
-    const maxDist = 140;
-    const maxDist2 = maxDist * maxDist;
+    // Move particles + build spatial grid
+    grid.clear();
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      if (p.x < 0) { p.x = 0; p.vx = -p.vx; }
+      else if (p.x > w) { p.x = w; p.vx = -p.vx; }
+      if (p.y < 0) { p.y = 0; p.vy = -p.vy; }
+      else if (p.y > h) { p.y = h; p.vy = -p.vy; }
 
-    // Connection lines between nearby particles
+      const cx = (p.x / CELL) | 0;
+      const cy = (p.y / CELL) | 0;
+      const key = cx * 100000 + cy;
+      let bucket = grid.get(key);
+      if (!bucket) { bucket = []; grid.set(key, bucket); }
+      bucket.push(i);
+    }
+
+    // Batch connection lines by alpha bucket
+    const buckets = [];
+    for (let b = 0; b < ALPHA_BUCKETS; b++) buckets.push([]);
+
     for (let i = 0; i < particles.length; i++) {
       const a = particles[i];
-      for (let j = i + 1; j < particles.length; j++) {
-        const b = particles[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < maxDist2) {
-          const alpha = (1 - Math.sqrt(d2) / maxDist) * 0.15;
-          ctx.strokeStyle = 'hsla(262, 85%, 62%, ' + alpha + ')';
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
+      const acx = (a.x / CELL) | 0;
+      const acy = (a.y / CELL) | 0;
+
+      for (let o = 0; o < NEIGHBOR_OFFSETS.length; o++) {
+        const ox = NEIGHBOR_OFFSETS[o][0];
+        const oy = NEIGHBOR_OFFSETS[o][1];
+        const key = (acx + ox) * 100000 + (acy + oy);
+        const bucket = grid.get(key);
+        if (!bucket) continue;
+
+        for (let bi = 0; bi < bucket.length; bi++) {
+          const j = bucket[bi];
+          if (j <= i) continue;
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < MAX_DIST_SQ) {
+            const t = 1 - Math.sqrt(d2) / MAX_DIST;
+            const level = Math.min(ALPHA_BUCKETS - 1, (t * ALPHA_BUCKETS) | 0);
+            buckets[level].push(a.x, a.y, b.x, b.y);
+          }
         }
       }
     }
 
-    // The glowing dots
+    for (let b = 0; b < ALPHA_BUCKETS; b++) {
+      const arr = buckets[b];
+      if (!arr.length) continue;
+      const alpha = ((b + 1) / ALPHA_BUCKETS) * 0.15;
+      ctx.strokeStyle = 'hsla(262, 85%, 62%, ' + alpha + ')';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      for (let k = 0; k < arr.length; k += 4) {
+        ctx.moveTo(arr[k], arr[k + 1]);
+        ctx.lineTo(arr[k + 2], arr[k + 3]);
+      }
+      ctx.stroke();
+    }
+
+    // Batch dots by hue
+    const hueBuckets = { 260: [], 220: [], 330: [] };
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0) { p.x = 0; p.vx *= -1; }
-      if (p.x > w) { p.x = w; p.vx *= -1; }
-      if (p.y < 0) { p.y = 0; p.vy *= -1; }
-      if (p.y > h) { p.y = h; p.vy *= -1; }
+      hueBuckets[p.hue].push(p);
+    }
 
+    for (const hue in hueBuckets) {
+      const list = hueBuckets[hue];
+      if (!list.length) continue;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'hsla(' + p.hue + ', 85%, 62%, ' + p.alpha + ')';
+      for (let i = 0; i < list.length; i++) {
+        const p = list[i];
+        ctx.moveTo(p.x + p.r, p.y);
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      }
+      ctx.fillStyle = 'hsla(' + hue + ', 85%, 62%, 0.55)';
       ctx.fill();
     }
 
@@ -558,6 +626,8 @@ updateSongInfo();
   function start() {
     if (running) return;
     running = true;
+    lastFrameTime = 0;
+    lastTimestamp = 0;
     rafId = requestAnimationFrame(draw);
   }
 
@@ -567,14 +637,12 @@ updateSongInfo();
     rafId = null;
   }
 
-  // Debounced resize (avoids thrashing during orientation changes)
   let resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(resize, 200);
   });
 
-  // Pause when tab is hidden (big battery win on iPad / mobile)
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) stop();
     else start();
