@@ -11,19 +11,14 @@
 </head>
 <body>
 
-  <!-- Animated background layers -->
   <canvas id="bgCanvas" class="bg-canvas" aria-hidden="true"></canvas>
   <div class="bg-grid" aria-hidden="true"></div>
 
-  <!-- Splash screen -->
   <div id="splash" aria-hidden="true">
     <img src="pictures/logo.png" alt="" class="splash-logo">
   </div>
 
-  <!-- App -->
   <div id="app">
-
-    <!-- ===== GALLERY ===== -->
     <main id="galleryView">
       <header class="gallery-header">
         <div class="gallery-brand">
@@ -67,11 +62,10 @@
       <div class="gallery-grid" id="galleryGrid"></div>
     </main>
 
-    <!-- ===== PLAYER ===== -->
-    <section id="playerView" aria-hidden="true">
+    <!-- ===== PLAYER (hidden attribute added here) ===== -->
+    <section id="playerView" aria-hidden="true" hidden>
       <div class="player-view-inner">
         <div class="player-layout">
-
           <div class="player-card">
             <div class="cover-wrap">
               <div id="player" class="youtube-player"></div>
@@ -161,14 +155,11 @@
             </div>
             <ul id="playlist"></ul>
           </aside>
-
         </div>
       </div>
     </section>
-
   </div>
 
-  <!-- ===== Mini player (non-interactive wrapper + explicit buttons) ===== -->
   <div id="miniPlayer" class="mini-player" aria-label="Mini player">
     <img id="miniCover" class="mini-cover" src="" alt="">
     <div class="mini-info">
@@ -195,7 +186,6 @@
     </button>
   </div>
 
-  <!-- Splash cleanup -->
   <script>
     setTimeout(function () {
       var s = document.getElementById('splash');
