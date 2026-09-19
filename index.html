@@ -19,7 +19,8 @@
     <!-- ===== GALLERY VIEW ===== -->
     <section id="galleryView">
       <header class="gallery-header">
-        <h1 class="gallery-logo">Nanatsukaze</h1>
+        <!-- 需求5：将文字标题改为 Logo 图片 -->
+        <img src="pictures/logo.jpeg" alt="Nanatsukaze" class="gallery-logo-img">
         <p class="gallery-sub">Music Collection</p>
       </header>
       <div class="gallery-grid" id="galleryGrid"></div>
@@ -38,7 +39,15 @@
             </div>
 
             <div class="song-info">
-              <h1 id="songTitle">—</h1>
+              <div class="song-title-wrap">
+                <h1 id="songTitle">—</h1>
+                <!-- 需求4：收藏按钮 -->
+                <button id="favoriteBtn" class="favorite-btn" title="Favorite" aria-label="Favorite">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                  </svg>
+                </button>
+              </div>
               <p id="songArtist">Nanatsukaze</p>
             </div>
 
@@ -102,29 +111,18 @@
                 </svg>
               </button>
             </div>
-
-            <div class="volume-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-              </svg>
-              <input type="range" id="volumeBar" min="0" max="100" value="80" aria-label="Volume">
-            </div>
+            <!-- 需求8：移除了音量滑块 -->
           </div>
 
           <!-- Playlist sidebar -->
           <aside class="playlist-section">
             <div class="playlist-header">
               <h2>Playlist</h2>
+              <!-- 需求6：返回按钮改为向下箭头 -->
               <button id="backToGalleryBtn" class="back-btn" title="Back to Gallery">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                  <polyline points="6 9 12 15 18 9"/>
                 </svg>
                 <span>Gallery</span>
               </button>
@@ -137,34 +135,6 @@
     </section>
 
   </div>
-
-  <!-- ===== Splash dismiss (independent from app.js) ===== -->
-  <script>
-    (function () {
-      var dismissed = false;
-      function dismiss() {
-        if (dismissed) return;
-        dismissed = true;
-        var splash = document.getElementById('splash');
-        if (splash) {
-          splash.classList.add('hide');
-          setTimeout(function () { splash.remove(); }, 800);
-        }
-        var app = document.getElementById('app');
-        if (app) app.classList.remove('app-hidden');
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-          setTimeout(dismiss, 2200);
-        });
-      } else {
-        setTimeout(dismiss, 2200);
-      }
-
-      setTimeout(dismiss, 5000);
-    })();
-  </script>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
