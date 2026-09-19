@@ -9,7 +9,8 @@ let isShuffle = false;
 let repeatMode = 'off'; // 'off' | 'all' | 'one'
 let progressInterval = null;
 let pendingVideoId = null;
-let hasActiveSong = false; // true once a song has actually been loaded
+let hasActiveSong = false;
+let searchQuery = '';
 
 // ===== DOM refs =====
 const playerView = document.getElementById('playerView');
@@ -18,6 +19,7 @@ const miniCover = document.getElementById('miniCover');
 const miniTitle = document.getElementById('miniTitle');
 const miniArtist = document.getElementById('miniArtist');
 const miniPlayBtn = document.getElementById('miniPlayBtn');
+const searchInput = document.getElementById('searchInput');
 
 // ===== Extract YouTube Video ID =====
 function extractVideoId(url) {
@@ -37,7 +39,6 @@ function extractVideoId(url) {
 function showGallery() {
   playerView.classList.remove('active');
   document.body.classList.remove('player-open');
-  // Music keeps playing in the background — show the mini-player
   if (hasActiveSong && playerReady && player) {
     showMiniPlayer();
   }
@@ -87,7 +88,15 @@ function renderGallery() {
   const grid = document.getElementById('galleryGrid');
   grid.innerHTML = '';
 
+  const q = searchQuery.trim().toLowerCase();
+  let visibleCount = 0;
+
   songs.forEach(function (song, i) {
+    const title = song.title.toLowerCase();
+    const artist = (song.artist || '').toLowerCase();
+    if (q && !title.includes(q) && !artist.includes(q)) return;
+
+    visibleCount++;
     const videoId = extractVideoId(song.youtubeLink);
     const card = document.createElement('div');
     card.className = 'gallery-card' + (videoId ? '' : ' no-link');
@@ -120,6 +129,14 @@ function renderGallery() {
 
     grid.appendChild(card);
   });
+
+  // Show "no results" message when search matches nothing
+  if (visibleCount === 0 && q) {
+    const msg = document.createElement('div');
+    msg.className = 'no-results';
+    msg.innerHTML = '<strong>No songs found</strong>Try a different search term.';
+    grid.appendChild(msg);
+  }
 }
 
 function openSongFromGallery(index) {
@@ -403,9 +420,22 @@ function bindEvents() {
     showGallery();
   });
 
+  // ===== Search bar =====
+  searchInput.addEventListener('input', function () {
+    searchQuery = this.value;
+    renderGallery();
+  });
+
+  // Press Enter → blur input to close the on-screen keyboard (mobile/iPad)
+  searchInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      e.preventDefault();
+      this.blur();
+    }
+  });
+
   // ===== Mini-player interactions =====
   miniPlayer.addEventListener('click', function (e) {
-    // Ignore clicks on the play button (it has its own handler)
     if (e.target.closest('#miniPlayBtn')) return;
     showPlayer();
   });
