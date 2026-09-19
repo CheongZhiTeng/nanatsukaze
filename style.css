@@ -60,8 +60,8 @@ body.player-open {
 }
 
 .splash-logo {
-  max-width: 400px;
-  width: 60%;
+  max-width: 800px;
+  width: 80%;
   height: auto;
   opacity: 0;
   transform: scale(1.85);
