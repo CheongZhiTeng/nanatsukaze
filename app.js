@@ -268,14 +268,23 @@ loadYouTubeAPI();
 bindEvents();
 
 // ===== 开场 Logo 动画控制 =====
-// 进入页面后：logo 淡入 (1.2s) → 停留 (1s) → 淡出 (0.8s) → 移除
-window.addEventListener('load', () => {
-  setTimeout(() => {
+// 关键点：不依赖 window.load，避免 YouTube 脚本卡住导致 splash 无法消失
+(function setupSplash() {
+  const dismiss = () => {
     const splash = document.getElementById('splash');
-    if (splash) {
+    if (splash && !splash.classList.contains('hide')) {
       splash.classList.add('hide');
-      // 淡出动画结束后从 DOM 中移除，避免遮挡
       setTimeout(() => splash.remove(), 800);
     }
-  }, 2200); // 1.2s 淡入 + 1s 停留
-});
+  };
+
+  // 页面结构就绪后开始计时（1.2s 淡入 + 1s 停留）
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(dismiss, 2200));
+  } else {
+    setTimeout(dismiss, 2200);
+  }
+
+  // 兜底保险：无论发生什么，5 秒后强制移除 splash
+  setTimeout(dismiss, 5000);
+})();
