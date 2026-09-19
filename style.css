@@ -41,7 +41,9 @@ body.player-open {
   overflow: hidden;
 }
 
-/* ===== Splash ===== */
+/* =================================================================
+   SPLASH — pure CSS, guaranteed to fade out
+   ================================================================= */
 #splash {
   position: fixed;
   inset: 0;
@@ -50,39 +52,28 @@ body.player-open {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  transition: opacity 0.8s ease, visibility 0.8s ease;
-}
-
-#splash.hide {
-  opacity: 0;
-  visibility: hidden;
   pointer-events: none;
+  animation: splashOut 0.8s ease 2.2s forwards;
 }
 
 .splash-logo {
-  width: min(80%, 800px); /* 优化：在桌面端限制最大宽度，移动端自适应 */
-  max-height: 60vh;
+  max-width: 260px;
+  width: 60%;
   height: auto;
-  object-fit: contain;
   opacity: 0;
-  transform: scale(0.8);
-  animation: logoAppear 1.2s ease forwards;
+  transform: scale(0.85);
+  animation: logoIn 1.2s ease forwards;
 }
 
-@keyframes logoAppear {
-  0%   { opacity: 0; transform: scale(0.8); }
+@keyframes logoIn {
+  0%   { opacity: 0; transform: scale(0.85); }
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* ===== App visibility ===== */
-.app-hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#app {
-  transition: opacity 0.6s ease;
-  min-height: 100vh;
+@keyframes splashOut {
+  0%   { opacity: 1; visibility: visible; }
+  99%  { opacity: 0; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
 }
 
 /* =================================================================
@@ -98,6 +89,7 @@ body.player-open {
   text-align: center;
   margin-bottom: 48px;
   animation: headerFade 0.7s ease both;
+  animation-delay: 2.4s;
 }
 
 @keyframes headerFade {
@@ -105,19 +97,17 @@ body.player-open {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 需求5：Gallery 顶部 Logo 样式 */
-.gallery-logo-img {
-  max-width: 180px;
-  width: 60%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+.gallery-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  letter-spacing: -0.02em;
 }
 
 .gallery-sub {
   font-size: 0.9rem;
   color: var(--gray-400);
-  margin-top: 8px;
+  margin-top: 6px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -142,15 +132,14 @@ body.player-open {
   will-change: transform;
 }
 
-/* 需求9：卡片悬停时增加轻微旋转 */
 .gallery-card:hover {
-  transform: translateY(-8px) scale(1.02) rotate(1deg);
+  transform: translateY(-8px) scale(1.02);
   box-shadow: var(--shadow-xl);
   border-color: var(--accent-soft);
 }
 
 .gallery-card:active {
-  transform: translateY(-2px) scale(0.99) rotate(0deg);
+  transform: translateY(-2px) scale(0.99);
   transition-duration: 0.12s;
 }
 
@@ -276,7 +265,6 @@ body.player-open {
   padding: 24px;
 }
 
-/* ==== Player layout ==== */
 .player-layout {
   display: flex;
   gap: 32px;
@@ -296,7 +284,6 @@ body.player-open {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ==== Player card ==== */
 .player-card {
   flex: 1;
   display: flex;
@@ -313,7 +300,6 @@ body.player-open {
   width: 0;
 }
 
-/* 需求7：当前播放歌曲封面的半透明边缘模糊效果 */
 .cover-wrap {
   position: relative;
   width: 100%;
@@ -323,19 +309,6 @@ body.player-open {
   background: var(--gray-100);
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.3s ease;
-  isolation: isolate; /* 隔离层级，防止模糊影响到外部 */
-}
-
-.cover-wrap::before {
-  content: '';
-  position: absolute;
-  inset: -20px;
-  background-image: var(--current-cover, none);
-  background-size: cover;
-  background-position: center;
-  filter: blur(20px) opacity(0.5);
-  z-index: -1;
-  border-radius: inherit;
 }
 
 .cover-wrap:hover {
@@ -362,18 +335,9 @@ body.player-open {
   border-radius: var(--radius-sm);
 }
 
-/* ==== Song info ==== */
 .song-info {
   text-align: center;
   padding: 0 8px;
-  position: relative;
-}
-
-.song-title-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
 }
 
 .song-info h1 {
@@ -397,31 +361,6 @@ body.player-open {
   margin-top: 4px;
 }
 
-/* 需求4：收藏按钮样式 */
-.favorite-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  color: var(--gray-400);
-  transition: color 0.2s ease, transform 0.2s var(--ease-bounce);
-  flex-shrink: 0;
-}
-
-.favorite-btn:hover {
-  transform: scale(1.2);
-  color: var(--gray-500);
-}
-
-.favorite-btn.active {
-  color: #ef4444;
-}
-
-.favorite-btn.active svg {
-  fill: currentColor;
-}
-
-/* ==== Progress ==== */
 .progress-wrap {
   display: flex;
   align-items: center;
@@ -431,7 +370,6 @@ body.player-open {
   font-variant-numeric: tabular-nums;
 }
 
-/* ==== Range sliders ==== */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -480,7 +418,6 @@ input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.3);
 }
 
-/* ==== Controls ==== */
 .controls {
   display: flex;
   justify-content: center;
@@ -510,19 +447,17 @@ input[type="range"]::-moz-range-thumb:hover {
   will-change: transform;
 }
 
-/* 需求9：按钮悬停上浮和发光 */
 .ctrl-btn:hover {
   background: var(--white);
   border-color: var(--accent-soft);
   color: var(--accent);
-  transform: translateY(-4px) scale(1.08);
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
 }
 
 .ctrl-btn:active {
-  transform: translateY(0) scale(0.92);
+  transform: translateY(0) scale(0.94);
   transition-duration: 0.1s;
-  box-shadow: var(--shadow-sm);
 }
 
 .ctrl-btn.primary {
@@ -538,8 +473,8 @@ input[type="range"]::-moz-range-thumb:hover {
   background: #5558e6;
   border-color: #5558e6;
   color: var(--white);
-  transform: translateY(-4px) scale(1.1);
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.45);
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 10px 28px rgba(99, 102, 241, 0.45);
 }
 
 .ctrl-btn.small {
@@ -558,7 +493,6 @@ input[type="range"]::-moz-range-thumb:hover {
   border-color: var(--accent);
 }
 
-/* SVG icons */
 .ctrl-btn svg {
   width: 20px;
   height: 20px;
@@ -579,7 +513,32 @@ input[type="range"]::-moz-range-thumb:hover {
 #repeatBtn.one .icon-repeat { display: none; }
 #repeatBtn.one .icon-repeat-one { display: block; }
 
-/* ==== Playlist sidebar ==== */
+.volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 40px;
+  font-size: 0.9rem;
+}
+
+.volume-wrap svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--gray-500);
+  transition: color 0.2s ease, transform 0.25s var(--ease-bounce);
+}
+
+.volume-wrap:hover svg {
+  color: var(--accent);
+  transform: scale(1.1);
+}
+
+.volume-wrap input {
+  flex: 1;
+  max-width: 140px;
+}
+
 .playlist-section {
   width: 320px;
   flex-shrink: 0;
@@ -608,7 +567,6 @@ input[type="range"]::-moz-range-thumb:hover {
   letter-spacing: 0.06em;
 }
 
-/* 需求6：返回按钮的向下箭头 */
 .back-btn {
   display: flex;
   align-items: center;
@@ -628,8 +586,8 @@ input[type="range"]::-moz-range-thumb:hover {
   background: var(--accent-light);
   border-color: var(--accent-soft);
   color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.15);
 }
 
 .back-btn:active {
@@ -637,13 +595,13 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 .back-btn svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.3s var(--ease-bounce);
+  width: 14px;
+  height: 14px;
+  transition: transform 0.25s var(--ease-bounce);
 }
 
 .back-btn:hover svg {
-  transform: translateY(3px); /* 悬停时箭头下沉 */
+  transform: rotate(-8deg) scale(1.1);
 }
 
 #playlist {
@@ -686,10 +644,9 @@ input[type="range"]::-moz-range-thumb:hover {
   will-change: transform;
 }
 
-/* 需求9：列表项悬停位移和缩放 */
 .playlist-item:hover {
   background: var(--gray-50);
-  transform: translateX(6px) scale(1.02);
+  transform: translateX(4px);
 }
 
 .playlist-item:active {
@@ -701,7 +658,7 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 .playlist-item.active:hover {
-  transform: translateX(0) scale(1);
+  transform: translateX(0);
 }
 
 .playlist-item.active .item-title {
@@ -793,8 +750,8 @@ input[type="range"]::-moz-range-thumb:hover {
     gap: 16px;
   }
 
-  .gallery-logo-img {
-    max-width: 140px;
+  .gallery-logo {
+    font-size: 1.5rem;
   }
 
   .player-view-inner {
@@ -826,8 +783,11 @@ input[type="range"]::-moz-range-thumb:hover {
     max-height: 340px;
   }
 
+  .volume-wrap { padding: 0 20px; }
   .ctrl-btn { width: 42px; height: 42px; }
   .ctrl-btn.primary { width: 54px; height: 54px; }
   .ctrl-btn svg { width: 18px; height: 18px; }
   .ctrl-btn.primary svg { width: 22px; height: 22px; }
+
+  .splash-logo { max-width: 180px; }
 }
