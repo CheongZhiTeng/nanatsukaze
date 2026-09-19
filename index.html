@@ -8,30 +8,28 @@
 </head>
 <body>
 
-  <!-- ===== Splash Screen ===== -->
+  <!-- ===== Splash (auto-dismisses via CSS, no JS needed) ===== -->
   <div id="splash">
-    <img src="pictures/logo.jpeg" alt="Nanatsukaze" class="splash-logo">
+    <img src="pictures/logo.jpg" alt="Nanatsukaze" class="splash-logo">
   </div>
 
   <!-- ===== App Container ===== -->
-  <div id="app" class="app-hidden">
+  <div id="app">
 
     <!-- ===== GALLERY VIEW ===== -->
     <section id="galleryView">
       <header class="gallery-header">
-        <!-- 需求5：将文字标题改为 Logo 图片 -->
-        <img src="pictures/logo.jpeg" alt="Nanatsukaze" class="gallery-logo-img">
+        <h1 class="gallery-logo">Nanatsukaze</h1>
         <p class="gallery-sub">Music Collection</p>
       </header>
       <div class="gallery-grid" id="galleryGrid"></div>
     </section>
 
-    <!-- ===== PLAYER VIEW (slides up from bottom) ===== -->
+    <!-- ===== PLAYER VIEW ===== -->
     <section id="playerView">
       <div class="player-view-inner">
         <div class="player-layout">
 
-          <!-- Player card -->
           <div class="player-card">
             <div class="cover-wrap">
               <div id="player" class="youtube-player"></div>
@@ -39,15 +37,7 @@
             </div>
 
             <div class="song-info">
-              <div class="song-title-wrap">
-                <h1 id="songTitle">—</h1>
-                <!-- 需求4：收藏按钮 -->
-                <button id="favoriteBtn" class="favorite-btn" title="Favorite" aria-label="Favorite">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                  </svg>
-                </button>
-              </div>
+              <h1 id="songTitle">—</h1>
               <p id="songArtist">Nanatsukaze</p>
             </div>
 
@@ -111,18 +101,28 @@
                 </svg>
               </button>
             </div>
-            <!-- 需求8：移除了音量滑块 -->
+
+            <div class="volume-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              </svg>
+              <input type="range" id="volumeBar" min="0" max="100" value="80" aria-label="Volume">
+            </div>
           </div>
 
-          <!-- Playlist sidebar -->
           <aside class="playlist-section">
             <div class="playlist-header">
               <h2>Playlist</h2>
-              <!-- 需求6：返回按钮改为向下箭头 -->
               <button id="backToGalleryBtn" class="back-btn" title="Back to Gallery">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="6 9 12 15 18 9"/>
+                  <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1.5"/>
                 </svg>
                 <span>Gallery</span>
               </button>
@@ -135,6 +135,14 @@
     </section>
 
   </div>
+
+  <!-- Cleanup: remove splash from DOM after animation ends (optional, purely cosmetic) -->
+  <script>
+    setTimeout(function () {
+      var s = document.getElementById('splash');
+      if (s && s.parentNode) s.parentNode.removeChild(s);
+    }, 4000);
+  </script>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
