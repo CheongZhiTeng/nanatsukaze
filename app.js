@@ -465,3 +465,121 @@ bindEvents();
 renderGallery();
 renderPlaylist();
 updateSongInfo();
+
+
+// =================================================================
+// Futuristic animated background — particle network
+// =================================================================
+(function initBackgroundParticles() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas) return;
+
+  // Respect users who disabled animations
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let w = 0, h = 0, dpr = 1;
+  let rafId = null;
+  let running = false;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Density: 1 particle per ~22000 px², min 20, max 80
+    const target = Math.min(Math.max(20, Math.floor((w * h) / 22000)), 80);
+    particles = [];
+    for (let i = 0; i < target; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 1.6 + 0.7,
+        hue: [260, 220, 330][Math.floor(Math.random() * 3)],
+        alpha: Math.random() * 0.4 + 0.35
+      });
+    }
+  }
+
+  function draw() {
+    if (!running) return;
+    ctx.clearRect(0, 0, w, h);
+
+    const maxDist = 140;
+    const maxDist2 = maxDist * maxDist;
+
+    // Connection lines between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j++) {
+        const b = particles[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < maxDist2) {
+          const alpha = (1 - Math.sqrt(d2) / maxDist) * 0.15;
+          ctx.strokeStyle = 'hsla(262, 85%, 62%, ' + alpha + ')';
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // The glowing dots
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) { p.x = 0; p.vx *= -1; }
+      if (p.x > w) { p.x = w; p.vx *= -1; }
+      if (p.y < 0) { p.y = 0; p.vy *= -1; }
+      if (p.y > h) { p.y = h; p.vy *= -1; }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'hsla(' + p.hue + ', 85%, 62%, ' + p.alpha + ')';
+      ctx.fill();
+    }
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  // Debounced resize (avoids thrashing during orientation changes)
+  let resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 200);
+  });
+
+  // Pause when tab is hidden (big battery win on iPad / mobile)
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+  start();
+})();
