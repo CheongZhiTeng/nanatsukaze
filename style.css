@@ -60,17 +60,18 @@ body.player-open {
 }
 
 .splash-logo {
-  max-width: 800px;
-  width: 80%;
-  height: auto;
-  opacity: 0;
-  transform: scale(1.85);
-  animation: logoAppear 1.2s ease forwards;
+    width: 80%;             /* 基础宽度占屏幕 80% */
+    max-height: 60vh;       /* 限制最大高度，防止竖屏时超出屏幕底部 */
+    height: auto;           /* 保持比例 */
+    object-fit: contain;    /* 确保图片完整显示，不被拉伸变形 */
+    opacity: 0;
+    transform: scale(0.8);  /* 起始稍微小一点 */
+    animation: logoAppear 1.2s ease forwards;
 }
 
 @keyframes logoAppear {
-  0%   { opacity: 0; transform: scale(1.85); }
-  100% { opacity: 1; transform: scale(3); }
+    0%   { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); } /* 最终恢复到正常大小(1) */
 }
 
 /* ===== App visibility ===== */
