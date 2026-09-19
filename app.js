@@ -21,35 +21,31 @@ const miniCover = document.getElementById('miniCover');
 const miniTitle = document.getElementById('miniTitle');
 const miniArtist = document.getElementById('miniArtist');
 const miniPlayBtn = document.getElementById('miniPlayBtn');
+const openPlayerBtn = document.getElementById('openPlayerBtn');
 const searchInput = document.getElementById('searchInput');
 
-// ===== Extract YouTube Video ID (robust URL parser) =====
+// ===== Extract YouTube Video ID (robust) =====
 function extractVideoId(value) {
   if (!value) return null;
 
-  // Already a bare 11-char video ID
   if (/^[\w-]{11}$/.test(value)) return value;
 
   try {
     const url = new URL(value);
 
-    // youtu.be/VIDEO_ID
     if (url.hostname === 'youtu.be' || url.hostname === 'www.youtu.be') {
       const id = url.pathname.slice(1).match(/^[\w-]{11}/);
       return id ? id[0] : null;
     }
 
-    // youtube.com/watch?v=VIDEO_ID (v may not be first param)
     if (url.searchParams.has('v')) {
       const v = url.searchParams.get('v');
       return /^[\w-]{11}$/.test(v) ? v : null;
     }
 
-    // /embed/VIDEO_ID, /live/VIDEO_ID, /shorts/VIDEO_ID
     const match = url.pathname.match(/\/(?:embed|live|shorts)\/([\w-]{11})/);
     return match ? match[1] : null;
   } catch {
-    // Fallback to regex for malformed URLs
     const m = value.match(
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
     );
@@ -57,19 +53,10 @@ function extractVideoId(value) {
   }
 }
 
-// ===== HTML escape helper (defense-in-depth) =====
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 // ===== View switching =====
 function showGallery() {
   playerView.classList.remove('active');
+  playerView.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('player-open');
   if (hasActiveSong && playerReady && player) {
     showMiniPlayer();
@@ -78,6 +65,7 @@ function showGallery() {
 
 function showPlayer() {
   playerView.classList.add('active');
+  playerView.setAttribute('aria-hidden', 'false');
   document.body.classList.add('player-open');
   hideMiniPlayer();
 }
@@ -136,17 +124,16 @@ function renderGallery() {
     card.setAttribute('tabindex', videoId ? '0' : '-1');
     card.setAttribute('aria-label', song.title + ' by ' + (song.artist || 'Nanatsukaze'));
 
-    // --- card-cover ---
+    // --- cover ---
     const cover = document.createElement('div');
     cover.className = 'card-cover';
 
     if (videoId) {
       const img = document.createElement('img');
-      img.alt = song.title;
+      img.alt = '';
       img.loading = 'lazy';
       img.onerror = function () {
         this.onerror = function () {
-          // Both maxres and mq failed — show gray placeholder
           this.style.display = 'none';
           cover.classList.add('img-error');
         };
@@ -159,11 +146,13 @@ function renderGallery() {
     const overlay = document.createElement('div');
     overlay.className = 'card-play-overlay';
     overlay.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/></svg>';
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/>' +
+      '</svg>';
     cover.appendChild(overlay);
     card.appendChild(cover);
 
-    // --- card-info ---
+    // --- info ---
     const info = document.createElement('div');
     info.className = 'card-info';
 
@@ -283,12 +272,11 @@ function onPlayerReady() {
   }
 }
 
-// ===== Player error: skip unavailable videos automatically =====
+// ===== Player error: auto-skip unavailable videos =====
 function onPlayerError(event) {
   console.warn('YouTube player error:', event.data);
   const song = songs[currentIndex];
 
-  // Show error text briefly
   const titleEl = document.getElementById('songTitle');
   if (titleEl && song) titleEl.textContent = song.title + ' — unavailable';
   const artistEl = document.getElementById('songArtist');
@@ -296,7 +284,6 @@ function onPlayerError(event) {
 
   errorSkipCount++;
 
-  // Auto-advance after a short delay (prevents infinite loop)
   if (errorSkipCount < MAX_ERROR_SKIPS) {
     setTimeout(function () {
       const next = findNextPlayable(currentIndex, 1, false);
@@ -319,6 +306,7 @@ function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
     hasActiveSong = true;
+    errorSkipCount = 0;
     updatePlayButton();
     startProgressTimer();
   } else if (event.data === YT.PlayerState.PAUSED) {
@@ -373,11 +361,11 @@ function prevSong() {
   if (prev !== -1) playSong(prev);
 }
 
-// ===== findNextPlayable — explicit wrap control, no self-selection in shuffle =====
+// ===== Find next playable — no self-selection in shuffle, explicit wrap =====
 function findNextPlayable(from, direction, allowWrap) {
   const playable = [];
   for (let i = 0; i < songs.length; i++) {
-    if (i === from) continue; // never pick current song
+    if (i === from) continue;
     if (extractVideoId(songs[i].youtubeLink)) playable.push(i);
   }
 
@@ -387,16 +375,13 @@ function findNextPlayable(from, direction, allowWrap) {
     return playable[Math.floor(Math.random() * playable.length)];
   }
 
-  // Sequential: find the next index in the given direction
   const len = songs.length;
   for (let step = 1; step <= len; step++) {
     const idx = (from + direction * step + len) % len;
-    if (idx === from) break; // wrapped all the way around
+    if (idx === from) break;
     if (extractVideoId(songs[idx].youtubeLink)) return idx;
   }
 
-  // If allowWrap is true and we didn't find one going forward,
-  // try from the other end (for manual "next" button)
   if (allowWrap) {
     for (let step = 1; step <= len; step++) {
       const idx = (from + direction * step + len) % len;
@@ -407,7 +392,7 @@ function findNextPlayable(from, direction, allowWrap) {
   return -1;
 }
 
-// ===== handleSongEnd — respects repeat mode =====
+// ===== Handle song end — respects repeat mode =====
 function handleSongEnd() {
   if (repeatMode === 'one') {
     player.seekTo(0);
@@ -415,7 +400,6 @@ function handleSongEnd() {
     return;
   }
 
-  // For repeat 'all', allow wrap. For 'off', don't wrap.
   const allowWrap = repeatMode === 'all';
   const next = findNextPlayable(currentIndex, 1, allowWrap);
 
@@ -483,7 +467,7 @@ function stopProgressTimer() {
   }
 }
 
-// ===== Playlist (safe DOM construction) =====
+// ===== Playlist (safe DOM) =====
 function renderPlaylist() {
   const ul = document.getElementById('playlist');
   ul.innerHTML = '';
@@ -494,13 +478,11 @@ function renderPlaylist() {
     li.setAttribute('tabindex', '0');
     const hasLink = !!extractVideoId(song.youtubeLink);
 
-    // index
     const idx = document.createElement('span');
     idx.className = 'item-index';
     idx.textContent = i + 1;
     li.appendChild(idx);
 
-    // info
     const info = document.createElement('div');
     info.className = 'item-info';
 
@@ -522,7 +504,6 @@ function renderPlaylist() {
 
     li.appendChild(info);
 
-    // playing bar
     const bar = document.createElement('div');
     bar.className = 'playing-bar';
     bar.innerHTML = '<span></span><span></span><span></span>';
@@ -578,7 +559,7 @@ function bindEvents() {
     showGallery();
   });
 
-  // ===== Search bar =====
+  // Search
   searchInput.addEventListener('input', function () {
     searchQuery = this.value;
     renderGallery();
@@ -591,21 +572,18 @@ function bindEvents() {
     }
   });
 
-  // ===== Mini-player (single interactive button) =====
+  // Mini player
   miniPlayBtn.addEventListener('click', function (e) {
     e.stopPropagation();
     togglePlay();
   });
 
-  // Open-player button (the outer wrapper is now a container, not a button)
-  const openPlayerBtn = document.getElementById('openPlayerBtn');
-  if (openPlayerBtn) {
-    openPlayerBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      showPlayer();
-    });
-  }
+  openPlayerBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    showPlayer();
+  });
 
+  // Escape to close player
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && playerView.classList.contains('active')) {
       showGallery();
@@ -621,7 +599,7 @@ renderPlaylist();
 updateSongInfo();
 
 // =================================================================
-// Futuristic animated background — full effects, optimized pipeline
+// Animated background — particle network
 // =================================================================
 (function initBackgroundParticles() {
   const canvas = document.getElementById('bgCanvas');
@@ -671,8 +649,7 @@ updateSongInfo();
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
         r: Math.random() * 1.6 + 0.7,
-        hue: [260, 220, 330][(Math.random() * 3) | 0],
-        alpha: Math.random() * 0.4 + 0.35
+        hue: [260, 220, 330][(Math.random() * 3) | 0]
       });
     }
   }
@@ -692,7 +669,40 @@ updateSongInfo();
 
     ctx.clearRect(0, 0, w, h);
 
-    // Move particles + build spatial grid
+    // Move + spatial grid
     grid.clear();
     for (let i = 0; i < particles.length; i++) {
-      const p 
+      const p = particles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      if (p.x < 0) { p.x = 0; p.vx = -p.vx; }
+      else if (p.x > w) { p.x = w; p.vx = -p.vx; }
+      if (p.y < 0) { p.y = 0; p.vy = -p.vy; }
+      else if (p.y > h) { p.y = h; p.vy = -p.vy; }
+
+      const cx = (p.x / CELL) | 0;
+      const cy = (p.y / CELL) | 0;
+      const key = cx * 100000 + cy;
+      let bucket = grid.get(key);
+      if (!bucket) { bucket = []; grid.set(key, bucket); }
+      bucket.push(i);
+    }
+
+    // Connection lines
+    const buckets = [];
+    for (let b = 0; b < ALPHA_BUCKETS; b++) buckets.push([]);
+
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      const acx = (a.x / CELL) | 0;
+      const acy = (a.y / CELL) | 0;
+
+      for (let o = 0; o < NEIGHBOR_OFFSETS.length; o++) {
+        const ox = NEIGHBOR_OFFSETS[o][0];
+        const oy = NEIGHBOR_OFFSETS[o][1];
+        const key = (acx + ox) * 100000 + (acy + oy);
+        const bucket = grid.get(key);
+        if (!bucket) continue;
+
+        for (let bi = 0; bi < bucket.length; bi++) {
+          const j = bucket[b
