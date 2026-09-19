@@ -8,10 +8,9 @@ let isPlaying = false;
 let isShuffle = false;
 let repeatMode = 'off'; // 'off' | 'all' | 'one'
 let progressInterval = null;
-let hasAutoPlayed = false;
+let pendingVideoId = null;
 
 // ===== View elements =====
-const galleryView = document.getElementById('galleryView');
 const playerView = document.getElementById('playerView');
 
 // ===== Extract YouTube Video ID =====
@@ -30,14 +29,19 @@ function extractVideoId(url) {
 
 // ===== View Switching =====
 function showGallery() {
-  galleryView.classList.add('active');
   playerView.classList.remove('active');
+  document.body.classList.remove('player-open');
   if (player && player.pauseVideo) player.pauseVideo();
 }
 
 function showPlayer() {
-  galleryView.classList.remove('active');
   playerView.classList.add('active');
+  document.body.classList.add('player-open');
+}
+
+// ===== Thumbnail helper =====
+function buildThumbUrl(videoId, quality) {
+  return 'https://i.ytimg.com/vi/' + videoId + '/' + quality + '.jpg';
 }
 
 // ===== Gallery =====
@@ -50,15 +54,11 @@ function renderGallery() {
     const card = document.createElement('div');
     card.className = 'gallery-card' + (videoId ? '' : ' no-link');
 
-    const thumb = videoId
-      ? 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg'
-      : '';
-
     card.innerHTML =
       '<div class="card-cover">' +
-        (thumb ? '<img src="' + thumb + '" alt="' + song.title + '" loading="lazy">' : '') +
+        (videoId ? '<img alt="' + song.title.replace(/"/g, '&quot;') + '" loading="lazy">' : '') +
         '<div class="card-play-overlay">' +
-          '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/></svg>' +
+          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/></svg>' +
         '</div>' +
       '</div>' +
       '<div class="card-info">' +
@@ -67,7 +67,15 @@ function renderGallery() {
         (videoId ? '' : '<div class="card-badge">No link</div>') +
       '</div>';
 
+    // Set thumbnail with fallback so aspect ratio is always 16:9
     if (videoId) {
+      const img = card.querySelector('.card-cover img');
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = buildThumbUrl(videoId, 'mqdefault');
+      };
+      img.src = buildThumbUrl(videoId, 'maxresdefault');
+
       card.addEventListener('click', function () {
         openSongFromGallery(i);
       });
@@ -84,7 +92,6 @@ function openSongFromGallery(index) {
   currentIndex = index;
   showPlayer();
 
-  // If player not ready yet, queue the video and play when ready
   if (!playerReady || !player) {
     pendingVideoId = videoId;
     return;
@@ -94,9 +101,6 @@ function openSongFromGallery(index) {
   updateSongInfo();
   updatePlaylistHighlight();
 }
-
-// Track a pending video if the player isn't ready yet
-let pendingVideoId = null;
 
 // ===== YouTube API =====
 function loadYouTubeAPI() {
@@ -143,7 +147,6 @@ function onPlayerReady() {
   player.setVolume(80);
   updateSongInfo();
 
-  // If the user clicked a gallery card before the player was ready
   if (pendingVideoId) {
     player.loadVideoById(pendingVideoId);
     pendingVideoId = null;
@@ -351,9 +354,15 @@ function bindEvents() {
                : 'Repeat Off';
   });
 
-  // Back to gallery
   document.getElementById('backToGalleryBtn').addEventListener('click', function () {
     showGallery();
+  });
+
+  // ESC key closes the player
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && playerView.classList.contains('active')) {
+      showGallery();
+    }
   });
 }
 
