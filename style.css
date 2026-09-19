@@ -1114,3 +1114,50 @@ input[type="range"]::-moz-range-thumb {
     height: 40px;
   }
 }
+
+
+
+/* =================================================================
+   FUTURISTIC ANIMATED BACKGROUND
+   ================================================================= */
+
+/* Particle canvas — above body gradient, below all content */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  display: block;
+}
+
+/* Animated HUD grid — very subtle, fades at edges */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridDrift 24s linear infinite;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
+}
+
+@keyframes gridDrift {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 50px 50px, 50px 50px; }
+}
+
+/* Let the particles peek through the player view too (optional) */
+#playerView {
+  background-color: rgba(250, 249, 252, 0.9);
+}
+
+/* Respect users who disable animations */
+@media (prefers-reduced-motion: reduce) {
+  .bg-grid {
+    animation: none;
+  }
+}
