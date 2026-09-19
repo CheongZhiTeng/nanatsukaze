@@ -137,6 +137,7 @@ body.player-open {
   height: auto;
   display: block;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
+  zoom: 150%;
 }
 
 .gallery-sub {
