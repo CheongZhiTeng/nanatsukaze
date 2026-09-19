@@ -11,6 +11,8 @@ let progressInterval = null;
 let pendingVideoId = null;
 let hasActiveSong = false;
 let searchQuery = '';
+let errorSkipCount = 0;
+const MAX_ERROR_SKIPS = 5;
 
 // ===== DOM refs =====
 const playerView = document.getElementById('playerView');
@@ -21,18 +23,48 @@ const miniArtist = document.getElementById('miniArtist');
 const miniPlayBtn = document.getElementById('miniPlayBtn');
 const searchInput = document.getElementById('searchInput');
 
-// ===== Extract YouTube Video ID =====
-function extractVideoId(url) {
-  if (!url) return null;
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
+// ===== Extract YouTube Video ID (robust URL parser) =====
+function extractVideoId(value) {
+  if (!value) return null;
+
+  // Already a bare 11-char video ID
+  if (/^[\w-]{11}$/.test(value)) return value;
+
+  try {
+    const url = new URL(value);
+
+    // youtu.be/VIDEO_ID
+    if (url.hostname === 'youtu.be' || url.hostname === 'www.youtu.be') {
+      const id = url.pathname.slice(1).match(/^[\w-]{11}/);
+      return id ? id[0] : null;
+    }
+
+    // youtube.com/watch?v=VIDEO_ID (v may not be first param)
+    if (url.searchParams.has('v')) {
+      const v = url.searchParams.get('v');
+      return /^[\w-]{11}$/.test(v) ? v : null;
+    }
+
+    // /embed/VIDEO_ID, /live/VIDEO_ID, /shorts/VIDEO_ID
+    const match = url.pathname.match(/\/(?:embed|live|shorts)\/([\w-]{11})/);
+    return match ? match[1] : null;
+  } catch {
+    // Fallback to regex for malformed URLs
+    const m = value.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
+    );
+    return m ? m[1] : null;
   }
-  return null;
+}
+
+// ===== HTML escape helper (defense-in-depth) =====
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ===== View switching =====
@@ -83,7 +115,7 @@ function hideMiniPlayer() {
   miniPlayer.classList.remove('show');
 }
 
-// ===== Gallery =====
+// ===== Gallery (safe DOM construction) =====
 function renderGallery() {
   const grid = document.getElementById('galleryGrid');
   grid.innerHTML = '';
@@ -100,30 +132,70 @@ function renderGallery() {
     const videoId = extractVideoId(song.youtubeLink);
     const card = document.createElement('div');
     card.className = 'gallery-card' + (videoId ? '' : ' no-link');
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', videoId ? '0' : '-1');
+    card.setAttribute('aria-label', song.title + ' by ' + (song.artist || 'Nanatsukaze'));
 
-    card.innerHTML =
-      '<div class="card-cover">' +
-        (videoId ? '<img alt="' + song.title.replace(/"/g, '&quot;') + '" loading="lazy">' : '') +
-        '<div class="card-play-overlay">' +
-          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/></svg>' +
-        '</div>' +
-      '</div>' +
-      '<div class="card-info">' +
-        '<div class="card-title">' + song.title + '</div>' +
-        '<div class="card-artist">' + (song.artist || 'Nanatsukaze') + '</div>' +
-        (videoId ? '' : '<div class="card-badge">No link</div>') +
-      '</div>';
+    // --- card-cover ---
+    const cover = document.createElement('div');
+    cover.className = 'card-cover';
 
     if (videoId) {
-      const img = card.querySelector('.card-cover img');
+      const img = document.createElement('img');
+      img.alt = song.title;
+      img.loading = 'lazy';
       img.onerror = function () {
-        this.onerror = null;
+        this.onerror = function () {
+          // Both maxres and mq failed — show gray placeholder
+          this.style.display = 'none';
+          cover.classList.add('img-error');
+        };
         this.src = buildThumbUrl(videoId, 'mqdefault');
       };
       img.src = buildThumbUrl(videoId, 'maxresdefault');
+      cover.appendChild(img);
+    }
 
+    const overlay = document.createElement('div');
+    overlay.className = 'card-play-overlay';
+    overlay.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/></svg>';
+    cover.appendChild(overlay);
+    card.appendChild(cover);
+
+    // --- card-info ---
+    const info = document.createElement('div');
+    info.className = 'card-info';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'card-title';
+    titleEl.textContent = song.title;
+    info.appendChild(titleEl);
+
+    const artistEl = document.createElement('div');
+    artistEl.className = 'card-artist';
+    artistEl.textContent = song.artist || 'Nanatsukaze';
+    info.appendChild(artistEl);
+
+    if (!videoId) {
+      const badge = document.createElement('div');
+      badge.className = 'card-badge';
+      badge.textContent = 'No link';
+      info.appendChild(badge);
+    }
+
+    card.appendChild(info);
+
+    // --- events ---
+    if (videoId) {
       card.addEventListener('click', function () {
         openSongFromGallery(i);
+      });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openSongFromGallery(i);
+        }
       });
     }
 
@@ -133,7 +205,10 @@ function renderGallery() {
   if (visibleCount === 0 && q) {
     const msg = document.createElement('div');
     msg.className = 'no-results';
-    msg.innerHTML = '<strong>No songs found</strong>Try a different search term.';
+    const strong = document.createElement('strong');
+    strong.textContent = 'No songs found';
+    msg.appendChild(strong);
+    msg.appendChild(document.createTextNode('Try a different search term.'));
     grid.appendChild(msg);
   }
 }
@@ -144,6 +219,7 @@ function openSongFromGallery(index) {
 
   currentIndex = index;
   hasActiveSong = true;
+  errorSkipCount = 0;
   showPlayer();
 
   if (!playerReady || !player) {
@@ -207,13 +283,35 @@ function onPlayerReady() {
   }
 }
 
+// ===== Player error: skip unavailable videos automatically =====
 function onPlayerError(event) {
   console.warn('YouTube player error:', event.data);
   const song = songs[currentIndex];
+
+  // Show error text briefly
   const titleEl = document.getElementById('songTitle');
   if (titleEl && song) titleEl.textContent = song.title + ' — unavailable';
   const artistEl = document.getElementById('songArtist');
-  if (artistEl) artistEl.textContent = 'This video cannot be embedded';
+  if (artistEl) artistEl.textContent = 'Skipping...';
+
+  errorSkipCount++;
+
+  // Auto-advance after a short delay (prevents infinite loop)
+  if (errorSkipCount < MAX_ERROR_SKIPS) {
+    setTimeout(function () {
+      const next = findNextPlayable(currentIndex, 1, false);
+      if (next !== -1) {
+        playSong(next);
+      } else {
+        isPlaying = false;
+        updatePlayButton();
+      }
+    }, 1200);
+  } else {
+    errorSkipCount = 0;
+    isPlaying = false;
+    updatePlayButton();
+  }
 }
 
 // ===== Player state =====
@@ -239,12 +337,13 @@ function playSong(index) {
   if (index < 0 || index >= songs.length) return;
   const videoId = extractVideoId(songs[index].youtubeLink);
   if (!videoId) {
-    const next = findNextPlayable(index, 1);
+    const next = findNextPlayable(index, 1, true);
     if (next !== -1 && next !== index) playSong(next);
     return;
   }
   currentIndex = index;
   hasActiveSong = true;
+  errorSkipCount = 0;
 
   if (playerReady && player) {
     player.loadVideoById(videoId);
@@ -265,45 +364,68 @@ function togglePlay() {
 }
 
 function nextSong() {
-  const next = findNextPlayable(currentIndex, 1);
+  const next = findNextPlayable(currentIndex, 1, true);
   if (next !== -1) playSong(next);
 }
 
 function prevSong() {
-  const prev = findNextPlayable(currentIndex, -1);
+  const prev = findNextPlayable(currentIndex, -1, true);
   if (prev !== -1) playSong(prev);
 }
 
-function findNextPlayable(from, direction) {
+// ===== findNextPlayable — explicit wrap control, no self-selection in shuffle =====
+function findNextPlayable(from, direction, allowWrap) {
+  const playable = [];
+  for (let i = 0; i < songs.length; i++) {
+    if (i === from) continue; // never pick current song
+    if (extractVideoId(songs[i].youtubeLink)) playable.push(i);
+  }
+
+  if (!playable.length) return -1;
+
+  if (isShuffle) {
+    return playable[Math.floor(Math.random() * playable.length)];
+  }
+
+  // Sequential: find the next index in the given direction
   const len = songs.length;
   for (let step = 1; step <= len; step++) {
-    let idx;
-    if (isShuffle) {
-      idx = Math.floor(Math.random() * len);
-    } else {
-      idx = (from + direction * step + len) % len;
-    }
-    if (idx === from && step > 0) {
-      if (extractVideoId(songs[idx].youtubeLink)) return idx;
-      continue;
-    }
+    const idx = (from + direction * step + len) % len;
+    if (idx === from) break; // wrapped all the way around
     if (extractVideoId(songs[idx].youtubeLink)) return idx;
   }
+
+  // If allowWrap is true and we didn't find one going forward,
+  // try from the other end (for manual "next" button)
+  if (allowWrap) {
+    for (let step = 1; step <= len; step++) {
+      const idx = (from + direction * step + len) % len;
+      if (extractVideoId(songs[idx].youtubeLink)) return idx;
+    }
+  }
+
   return -1;
 }
 
+// ===== handleSongEnd — respects repeat mode =====
 function handleSongEnd() {
   if (repeatMode === 'one') {
     player.seekTo(0);
     player.playVideo();
     return;
   }
-  const next = findNextPlayable(currentIndex, 1);
-  if (next !== -1) playSong(next);
-  else {
+
+  // For repeat 'all', allow wrap. For 'off', don't wrap.
+  const allowWrap = repeatMode === 'all';
+  const next = findNextPlayable(currentIndex, 1, allowWrap);
+
+  if (next === -1) {
     isPlaying = false;
     updatePlayButton();
+    return;
   }
+
+  playSong(next);
 }
 
 // ===== UI =====
@@ -361,25 +483,61 @@ function stopProgressTimer() {
   }
 }
 
-// ===== Playlist =====
+// ===== Playlist (safe DOM construction) =====
 function renderPlaylist() {
   const ul = document.getElementById('playlist');
   ul.innerHTML = '';
   songs.forEach(function (song, i) {
     const li = document.createElement('li');
     li.className = 'playlist-item';
+    li.setAttribute('role', 'button');
+    li.setAttribute('tabindex', '0');
     const hasLink = !!extractVideoId(song.youtubeLink);
-    li.innerHTML =
-      '<span class="item-index">' + (i + 1) + '</span>' +
-      '<div class="item-info">' +
-        '<div class="item-title">' + song.title + (hasLink ? '' : ' <span style="font-size:0.7rem;color:var(--gray-300);">(no link)</span>') + '</div>' +
-        '<div class="item-artist">' + (song.artist || 'Nanatsukaze') + '</div>' +
-      '</div>' +
-      '<div class="playing-bar"><span></span><span></span><span></span></div>';
+
+    // index
+    const idx = document.createElement('span');
+    idx.className = 'item-index';
+    idx.textContent = i + 1;
+    li.appendChild(idx);
+
+    // info
+    const info = document.createElement('div');
+    info.className = 'item-info';
+
+    const title = document.createElement('div');
+    title.className = 'item-title';
+    title.textContent = song.title;
+    if (!hasLink) {
+      const badge = document.createElement('span');
+      badge.style.cssText = 'font-size:0.7rem;color:var(--gray-300);';
+      badge.textContent = ' (no link)';
+      title.appendChild(badge);
+    }
+    info.appendChild(title);
+
+    const artist = document.createElement('div');
+    artist.className = 'item-artist';
+    artist.textContent = song.artist || 'Nanatsukaze';
+    info.appendChild(artist);
+
+    li.appendChild(info);
+
+    // playing bar
+    const bar = document.createElement('div');
+    bar.className = 'playing-bar';
+    bar.innerHTML = '<span></span><span></span><span></span>';
+    li.appendChild(bar);
 
     li.addEventListener('click', function () {
       if (hasLink) playSong(i);
     });
+    li.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && hasLink) {
+        e.preventDefault();
+        playSong(i);
+      }
+    });
+
     ul.appendChild(li);
   });
 }
@@ -401,6 +559,7 @@ function bindEvents() {
   document.getElementById('shuffleBtn').addEventListener('click', function () {
     isShuffle = !isShuffle;
     this.classList.toggle('active', isShuffle);
+    this.setAttribute('aria-pressed', isShuffle);
   });
 
   document.getElementById('repeatBtn').addEventListener('click', function () {
@@ -409,6 +568,7 @@ function bindEvents() {
     repeatMode = modes[(idx + 1) % modes.length];
     this.classList.toggle('active', repeatMode !== 'off');
     this.classList.toggle('one', repeatMode === 'one');
+    this.setAttribute('aria-pressed', repeatMode !== 'off');
     this.title = repeatMode === 'one' ? 'Repeat One'
                : repeatMode === 'all' ? 'Repeat All'
                : 'Repeat Off';
@@ -431,23 +591,20 @@ function bindEvents() {
     }
   });
 
-  // ===== Mini-player =====
-  miniPlayer.addEventListener('click', function (e) {
-    if (e.target.closest('#miniPlayBtn')) return;
-    showPlayer();
-  });
-
-  miniPlayer.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && e.target === miniPlayer) {
-      e.preventDefault();
-      showPlayer();
-    }
-  });
-
+  // ===== Mini-player (single interactive button) =====
   miniPlayBtn.addEventListener('click', function (e) {
     e.stopPropagation();
     togglePlay();
   });
+
+  // Open-player button (the outer wrapper is now a container, not a button)
+  const openPlayerBtn = document.getElementById('openPlayerBtn');
+  if (openPlayerBtn) {
+    openPlayerBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      showPlayer();
+    });
+  }
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && playerView.classList.contains('active')) {
@@ -538,116 +695,4 @@ updateSongInfo();
     // Move particles + build spatial grid
     grid.clear();
     for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      if (p.x < 0) { p.x = 0; p.vx = -p.vx; }
-      else if (p.x > w) { p.x = w; p.vx = -p.vx; }
-      if (p.y < 0) { p.y = 0; p.vy = -p.vy; }
-      else if (p.y > h) { p.y = h; p.vy = -p.vy; }
-
-      const cx = (p.x / CELL) | 0;
-      const cy = (p.y / CELL) | 0;
-      const key = cx * 100000 + cy;
-      let bucket = grid.get(key);
-      if (!bucket) { bucket = []; grid.set(key, bucket); }
-      bucket.push(i);
-    }
-
-    // Batch connection lines by alpha bucket
-    const buckets = [];
-    for (let b = 0; b < ALPHA_BUCKETS; b++) buckets.push([]);
-
-    for (let i = 0; i < particles.length; i++) {
-      const a = particles[i];
-      const acx = (a.x / CELL) | 0;
-      const acy = (a.y / CELL) | 0;
-
-      for (let o = 0; o < NEIGHBOR_OFFSETS.length; o++) {
-        const ox = NEIGHBOR_OFFSETS[o][0];
-        const oy = NEIGHBOR_OFFSETS[o][1];
-        const key = (acx + ox) * 100000 + (acy + oy);
-        const bucket = grid.get(key);
-        if (!bucket) continue;
-
-        for (let bi = 0; bi < bucket.length; bi++) {
-          const j = bucket[bi];
-          if (j <= i) continue;
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < MAX_DIST_SQ) {
-            const t = 1 - Math.sqrt(d2) / MAX_DIST;
-            const level = Math.min(ALPHA_BUCKETS - 1, (t * ALPHA_BUCKETS) | 0);
-            buckets[level].push(a.x, a.y, b.x, b.y);
-          }
-        }
-      }
-    }
-
-    for (let b = 0; b < ALPHA_BUCKETS; b++) {
-      const arr = buckets[b];
-      if (!arr.length) continue;
-      const alpha = ((b + 1) / ALPHA_BUCKETS) * 0.15;
-      ctx.strokeStyle = 'hsla(262, 85%, 62%, ' + alpha + ')';
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      for (let k = 0; k < arr.length; k += 4) {
-        ctx.moveTo(arr[k], arr[k + 1]);
-        ctx.lineTo(arr[k + 2], arr[k + 3]);
-      }
-      ctx.stroke();
-    }
-
-    // Batch dots by hue
-    const hueBuckets = { 260: [], 220: [], 330: [] };
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      hueBuckets[p.hue].push(p);
-    }
-
-    for (const hue in hueBuckets) {
-      const list = hueBuckets[hue];
-      if (!list.length) continue;
-      ctx.beginPath();
-      for (let i = 0; i < list.length; i++) {
-        const p = list[i];
-        ctx.moveTo(p.x + p.r, p.y);
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      }
-      ctx.fillStyle = 'hsla(' + hue + ', 85%, 62%, 0.55)';
-      ctx.fill();
-    }
-
-    rafId = requestAnimationFrame(draw);
-  }
-
-  function start() {
-    if (running) return;
-    running = true;
-    lastFrameTime = 0;
-    lastTimestamp = 0;
-    rafId = requestAnimationFrame(draw);
-  }
-
-  function stop() {
-    running = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-
-  let resizeTimer = null;
-  window.addEventListener('resize', function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 200);
-  });
-
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) stop();
-    else start();
-  });
-
-  resize();
-  start();
-})();
+      const p 
