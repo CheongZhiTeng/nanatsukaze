@@ -13,7 +13,7 @@ const songs = [
   { title: "End of the Summer", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=gsqRwAOfOnw" },
   { title: "Hazy Moon Night", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/svhAjo4X0yc" },
   { title: "Dream Gravity", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=1TaEXrdCp6A" },
-  { title: "Save Our Sound", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=2YrkJsR83S8" },
+  { title: "Save Our Sound", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/nLWXur60vC8?si=AN2VTAR0Zpuccm2V" },
   { title: "Goodbye Wonderland", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/I-ea4Opix3E?si=yU5NyqxxgCTQiNkZ" },
   { title: "Flying Cat", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=EQgHnfXAMBY" },
   { title: "Soramimi", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/vJDxS_ovbpc?si=73uLPeCfvWZXYw3n" },
@@ -21,5 +21,5 @@ const songs = [
   { title: "Youth is Gone", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/KOp36bZMp4Q?si=e6YBmSLgfZbA6x9C" },
   { title: "Sakura Rain", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/4sKjn3ryB14?si=_iAJLjZrofWx_pHS" },
   { title: "Messiah", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/sX-7C9Xlw0Y?si=7iZekbwrHmWk9YPN" },
-  { title: "Needle of Words", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=e9P3iVG5Lxs" },
+  { title: "Needle of Words", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/7AfVSx3Hov0?si=BAdPhh9vkw0YPsgV" },
 ];
