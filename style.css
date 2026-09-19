@@ -71,6 +71,20 @@ body.player-open {
 }
 
 /* =================================================================
+   FOCUS STYLES (accessibility)
+   ================================================================= */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+.gallery-card:focus-visible,
+.playlist-item:focus-visible,
+.mini-play-btn:focus-visible,
+.mini-open-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* =================================================================
    SPLASH
    ================================================================= */
 #splash {
@@ -140,8 +154,6 @@ body.player-open {
   overflow: visible;
 }
 
-/* Zoomed logo — scale is adjusted via transform, origin keeps it
-   aligned to the left on desktop */
 .gallery-logo {
   max-width: 180px;
   width: 100%;
@@ -343,6 +355,21 @@ body.player-open {
   aspect-ratio: 16 / 9;
   background: var(--gray-100);
   overflow: hidden;
+}
+
+.card-cover.img-error {
+  background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+}
+
+.card-cover.img-error::after {
+  content: '♪';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--gray-300);
 }
 
 .card-cover img {
@@ -868,36 +895,4 @@ input[type="range"]::-moz-range-thumb {
 
 .playlist-item .item-title {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--gray-700);
-}
-
-.playlist-item .item-artist {
-  font-size: 0.72rem;
-  color: var(--gray-400);
-  margin-top: 2px;
-}
-
-.playlist-item .playing-bar {
-  display: none;
-  gap: 2px;
-  align-items: flex-end;
-  height: 14px;
-  flex-shrink: 0;
-}
-
-.playlist-item.active .playing-bar {
-  display: flex;
-}
-
-.playing-bar span {
-  display: block;
-  width: 3px;
-  background: linear-gradient(180deg, #6366f1, #a855f7);
-  border-radius: 1px;
-  animation: bounce 0.8s ease-in-out infinite;
-}
-
-.playing-bar span:nth-child(1) { height: 6px; animation-delay: 0s; }
-.playing-bar span
+  overflow: h
