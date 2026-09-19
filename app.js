@@ -266,3 +266,16 @@ function bindEvents() {
 // ===== 启动 =====
 loadYouTubeAPI();
 bindEvents();
+
+// ===== 开场 Logo 动画控制 =====
+// 进入页面后：logo 淡入 (1.2s) → 停留 (1s) → 淡出 (0.8s) → 移除
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if (splash) {
+      splash.classList.add('hide');
+      // 淡出动画结束后从 DOM 中移除，避免遮挡
+      setTimeout(() => splash.remove(), 800);
+    }
+  }, 2200); // 1.2s 淡入 + 1s 停留
+});
