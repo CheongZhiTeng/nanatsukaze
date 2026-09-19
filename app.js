@@ -53,7 +53,6 @@ function extractVideoId(value) {
   }
 }
 
-// ===== View switching =====
 function showGallery() {
   playerView.classList.remove('active');
   playerView.setAttribute('aria-hidden', 'true');
@@ -63,7 +62,11 @@ function showGallery() {
   }
 }
 
+
 function showPlayer() {
+  playerView.style.display = 'block';
+  // Force reflow so the animation triggers
+  void playerView.offsetWidth;
   playerView.classList.add('active');
   playerView.setAttribute('aria-hidden', 'false');
   document.body.classList.add('player-open');
