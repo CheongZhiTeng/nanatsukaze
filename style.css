@@ -35,20 +35,35 @@
 }
 
 /* =================================================================
-   BODY — Vibrant mesh gradient background
+   HTML & BODY
    ================================================================= */
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Michroma', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans', sans-serif;
   color: var(--gray-700);
   min-height: 100vh;
   background-color: #faf9fc;
+  overflow-x: hidden;
+}
+
+/* Fixed gradient on its own composited layer — never repaints on scroll */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
   background-image:
     radial-gradient(at 12% 8%,  rgba(139, 92, 246, 0.22) 0px, transparent 45%),
     radial-gradient(at 88% 4%,  rgba(236, 72, 153, 0.16) 0px, transparent 45%),
     radial-gradient(at 4% 62%,  rgba(59, 130, 246, 0.18) 0px, transparent 45%),
     radial-gradient(at 96% 72%, rgba(251, 191, 36, 0.14) 0px, transparent 45%),
     radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.14) 0px, transparent 50%);
-  background-attachment: fixed;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 body.player-open {
@@ -122,14 +137,24 @@ body.player-open {
   align-items: flex-start;
   min-width: 0;
   flex-shrink: 0;
+  overflow: visible;
 }
 
+/* Zoomed logo — scale is adjusted via transform, origin keeps it
+   aligned to the left on desktop */
 .gallery-logo {
   max-width: 180px;
   width: 100%;
   height: auto;
   display: block;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
+  transform: scale(1.5);
+  transform-origin: left center;
+  transition: transform 0.4s var(--ease-bounce);
+}
+
+.gallery-logo:hover {
+  transform: scale(1.6);
 }
 
 .gallery-sub {
@@ -179,6 +204,8 @@ body.player-open {
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
   transition: border-color 0.25s ease, box-shadow 0.3s ease,
               background 0.25s ease, transform 0.25s var(--ease-bounce);
+  contain: layout style;
+  transform: translateZ(0);
 }
 
 .search-input::placeholder {
@@ -202,14 +229,12 @@ body.player-open {
   transform: scale(1.1);
 }
 
-/* Hide native clear button (keeps things clean, no search button) */
 .search-input::-webkit-search-cancel-button,
 .search-input::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }
 
-/* No results message */
 .no-results {
   grid-column: 1 / -1;
   text-align: center;
@@ -227,7 +252,9 @@ body.player-open {
   letter-spacing: 0.02em;
 }
 
-/* ==== Social links ==== */
+/* =================================================================
+   SOCIAL LINKS
+   ================================================================= */
 .social-links {
   display: flex;
   align-items: center;
@@ -251,6 +278,8 @@ body.player-open {
   text-decoration: none;
   transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease,
               transform 0.3s var(--ease-bounce), box-shadow 0.3s ease;
+  contain: layout style;
+  transform: translateZ(0);
 }
 
 .social-btn:hover {
@@ -271,7 +300,9 @@ body.player-open {
   display: block;
 }
 
-/* ==== Gallery grid ==== */
+/* =================================================================
+   GALLERY GRID
+   ================================================================= */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -286,6 +317,7 @@ body.player-open {
   cursor: pointer;
   transition: transform 0.35s var(--ease-bounce), box-shadow 0.35s var(--ease-smooth);
   border: 1px solid rgba(255, 255, 255, 0.9);
+  contain: layout style;
 }
 
 .gallery-card:hover {
@@ -389,17 +421,23 @@ body.player-open {
 }
 
 /* =================================================================
-   PLAYER VIEW — vibrant background
+   PLAYER VIEW
    ================================================================= */
 #playerView {
   position: fixed;
   inset: 0;
   z-index: 100;
   overflow-y: auto;
+  overflow-x: hidden;
   transform: translateY(100%);
-  transition: transform 0.55s var(--ease-slide), box-shadow 0.55s var(--ease-slide);
+  visibility: hidden;
+  transition:
+    transform 0.55s var(--ease-slide),
+    visibility 0s 0.55s;
   pointer-events: none;
   will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   background-color: #faf9fc;
   background-image:
     radial-gradient(at 10% 10%, rgba(139, 92, 246, 0.28) 0px, transparent 50%),
@@ -407,12 +445,15 @@ body.player-open {
     radial-gradient(at 6% 82%, rgba(59, 130, 246, 0.22) 0px, transparent 50%),
     radial-gradient(at 94% 92%, rgba(251, 191, 36, 0.18) 0px, transparent 50%),
     radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.12) 0px, transparent 60%);
-  background-attachment: fixed;
 }
 
 #playerView.active {
   transform: translateY(0);
+  visibility: visible;
   pointer-events: auto;
+  transition:
+    transform 0.55s var(--ease-slide),
+    visibility 0s 0s;
   box-shadow: 0 -20px 60px rgba(99, 102, 241, 0.2);
 }
 
@@ -462,6 +503,9 @@ body.player-open {
   width: 0;
 }
 
+/* =================================================================
+   COVER (YouTube iframe container)
+   ================================================================= */
 .cover-wrap {
   position: relative;
   width: 100%;
@@ -471,6 +515,8 @@ body.player-open {
   background: #000;
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
   transition: box-shadow 0.3s ease;
+  isolation: isolate;
+  contain: strict;
 }
 
 .cover-wrap:hover {
@@ -478,12 +524,15 @@ body.player-open {
 }
 
 .youtube-player,
-.youtube-player iframe {
+.youtube-player iframe,
+#player iframe {
   width: 100%;
   height: 100%;
-  border: none;
+  border: 0 !important;
+  outline: none !important;
   border-radius: var(--radius-sm);
   display: block;
+  background: transparent;
 }
 
 .cover-overlay {
@@ -851,313 +900,4 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .playing-bar span:nth-child(1) { height: 6px; animation-delay: 0s; }
-.playing-bar span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
-.playing-bar span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
-
-@keyframes bounce {
-  0%, 100% { transform: scaleY(0.5); }
-  50%      { transform: scaleY(1); }
-}
-
-/* =================================================================
-   MINI PLAYER — bottom-right floating popup
-   ================================================================= */
-.mini-player {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 340px;
-  max-width: calc(100vw - 48px);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 14px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow:
-    0 20px 48px rgba(99, 102, 241, 0.25),
-    0 8px 20px rgba(236, 72, 153, 0.15),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  z-index: 50;
-  transform: translateY(140%) scale(0.95);
-  opacity: 0;
-  transition:
-    transform 0.5s var(--ease-slide),
-    opacity 0.4s ease,
-    box-shadow 0.3s ease;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-.mini-player.show {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.mini-player.show:hover {
-  transform: translateY(-3px) scale(1.015);
-  box-shadow:
-    0 24px 56px rgba(99, 102, 241, 0.35),
-    0 12px 26px rgba(236, 72, 153, 0.22),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.mini-player:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
-.mini-cover {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: var(--gray-100);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
-  transition: transform 0.3s var(--ease-bounce);
-}
-
-.mini-player:hover .mini-cover {
-  transform: scale(1.05);
-}
-
-.mini-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.mini-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--gray-700);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color 0.2s ease;
-}
-
-.mini-player:hover .mini-title {
-  color: var(--accent);
-}
-
-.mini-artist {
-  font-size: 0.7rem;
-  color: var(--gray-400);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mini-play-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 0;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
-  transition: transform 0.25s var(--ease-bounce), box-shadow 0.25s ease;
-}
-
-.mini-play-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.6);
-}
-
-.mini-play-btn:active {
-  transform: scale(0.94);
-}
-
-.mini-play-btn svg {
-  width: 18px;
-  height: 18px;
-  display: block;
-  pointer-events: none;
-}
-
-.mini-play-btn .mini-icon-pause { display: none; }
-.mini-play-btn.playing .mini-icon-play { display: none; }
-.mini-play-btn.playing .mini-icon-pause { display: block; }
-
-/* =================================================================
-   RESPONSIVE
-   ================================================================= */
-@media (max-width: 900px) {
-  .gallery-header {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .search-wrap {
-    order: 3;
-    flex-basis: 100%;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  #galleryView { padding: 32px 16px 48px; }
-
-  .gallery-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 16px;
-    padding-bottom: 20px;
-    margin-bottom: 28px;
-  }
-
-  .gallery-brand {
-    align-items: center;
-  }
-
-  .gallery-logo {
-    max-width: 150px;
-  }
-
-  .gallery-sub {
-    font-size: 0.75rem;
-  }
-
-  .search-wrap {
-    width: 100%;
-    max-width: none;
-    order: 0;
-  }
-
-  .search-input {
-    height: 44px;
-    font-size: 0.85rem;
-  }
-
-  .social-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-  }
-
-  .social-btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .gallery-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
-  }
-
-  .player-view-inner {
-    padding: 0;
-    align-items: flex-start;
-  }
-
-  .player-layout {
-    flex-direction: column;
-    border-radius: 0;
-    padding: 24px 20px;
-    height: auto;
-    max-height: none;
-    min-height: 100vh;
-    gap: 24px;
-  }
-
-  .player-card {
-    overflow-y: visible;
-    padding-right: 0;
-  }
-
-  .playlist-section {
-    width: 100%;
-    border-left: none;
-    padding-left: 0;
-    border-top: 1px solid var(--gray-100);
-    padding-top: 24px;
-    max-height: 340px;
-  }
-
-  .ctrl-btn { width: 42px; height: 42px; }
-  .ctrl-btn.primary { width: 54px; height: 54px; }
-  .ctrl-btn svg { width: 18px; height: 18px; }
-  .ctrl-btn.primary svg { width: 22px; height: 22px; }
-
-  .splash-logo { max-width: 180px; }
-
-  .mini-player {
-    bottom: 16px;
-    right: 16px;
-    left: 16px;
-    width: auto;
-    max-width: none;
-    padding: 10px;
-  }
-
-  .mini-cover {
-    width: 44px;
-    height: 44px;
-  }
-
-  .mini-play-btn {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-
-
-/* =================================================================
-   FUTURISTIC ANIMATED BACKGROUND
-   ================================================================= */
-
-/* Particle canvas — above body gradient, below all content */
-.bg-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  display: block;
-}
-
-/* Animated HUD grid — very subtle, fades at edges */
-.bg-grid {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: gridDrift 24s linear infinite;
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
-  mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
-}
-
-@keyframes gridDrift {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 50px 50px, 50px 50px; }
-}
-
-/* Let the particles peek through the player view too (optional) */
-#playerView {
-  background-color: rgba(250, 249, 252, 0.9);
-}
-
-/* Respect users who disable animations */
-@media (prefers-reduced-motion: reduce) {
-  .bg-grid {
-    animation: none;
-  }
-}
+.playing-bar span
