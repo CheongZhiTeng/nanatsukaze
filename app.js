@@ -497,6 +497,19 @@ function bindEvents() {
     showPlayer();
   });
 
+  // Sidebar toggle
+  const playerLayout = document.getElementById('playerLayout');
+  const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+
+  if (toggleSidebarBtn && playerLayout) {
+    toggleSidebarBtn.addEventListener('click', function () {
+      const isHidden = playerLayout.classList.toggle('sidebar-hidden');
+      this.classList.toggle('collapsed', isHidden);
+      this.setAttribute('aria-pressed', isHidden);
+      this.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
+    });
+  }
+
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !playerView.hidden) showGallery();
   });
