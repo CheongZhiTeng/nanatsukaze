@@ -1,7 +1,7 @@
 // data.js
-// Nanatsukaze 全部歌曲列表 (English Titles)
-// youtubeLink 为空的歌曲，播放器会自动跳过
-// 找到新链接时，直接填入对应字段即可
+// Nanatsukaze full song list (English titles)
+// Songs with empty youtubeLink are automatically skipped
+// Fill in the URL when you find a link
 
 const songs = [
   { title: "Connect the World", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=zyzR7XHeJsQ" },
@@ -17,14 +17,13 @@ const songs = [
   { title: "Vacuum City", artist: "Nanatsukaze", youtubeLink: "" },
   { title: "Sentimental Life", artist: "Nanatsukaze", youtubeLink: "" },
   { title: "Goodbye Wonderland", artist: "Nanatsukaze", youtubeLink: "" },
-  { title: "Flying Cat", artist: "Nanatsukaze", youtubeLink: "" },
+  { title: "Flying Cat", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=EQgHnfXAMBY" },
   { title: "Android", artist: "Nanatsukaze", youtubeLink: "" },
   { title: "Soramimi", artist: "Nanatsukaze", youtubeLink: "" },
-  { title: "May Cat", artist: "Nanatsukaze", youtubeLink: "" },
+  { title: "May Cat", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/live/xYXIh06fV_w" },
   { title: "Youth is Gone", artist: "Nanatsukaze", youtubeLink: "" },
-  { title: "Sakura Rain", artist: "Nanatsukaze", youtubeLink: "" },  
+  { title: "Sakura Rain", artist: "Nanatsukaze", youtubeLink: "" },
   { title: "Messiah", artist: "Nanatsukaze", youtubeLink: "" },
-  { title: "Needle of Words", artist: "Nanatsukaze", youtubeLink: "" },
-  { title: "四面楚歌", artist: "Nanatsukaze", youtubeLink: "" },
-
+  { title: "Needle of Words", artist: "Nanatsukaze", youtubeLink: "https://www.youtube.com/watch?v=e9P3iVG5Lxs" },
+  { title: "Besieged on All Sides", artist: "Nanatsukaze", youtubeLink: "" }
 ];
