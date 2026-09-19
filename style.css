@@ -57,17 +57,17 @@ body.player-open {
 }
 
 .splash-logo {
-  max-width: 260px;
-  width: 60%;
+  max-width: 750px;
+  width: 80%;
   height: auto;
   opacity: 0;
-  transform: scale(0.85);
+  transform: scale(1.5);
   animation: logoIn 1.2s ease forwards;
 }
 
 @keyframes logoIn {
-  0%   { opacity: 0; transform: scale(0.85); }
-  100% { opacity: 1; transform: scale(1); }
+  0%   { opacity: 0; transform: scale(1.5); }
+  100% { opacity: 1; transform: scale(3); }
 }
 
 @keyframes splashOut {
