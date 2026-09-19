@@ -112,8 +112,14 @@ body.player-open {
 }
 
 .gallery-logo {
-  /.placeholder./
+  max-width: 220px;
+  width: 60%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
 }
+
 
 .gallery-sub {
   font-size: 0.9rem;
