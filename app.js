@@ -9,8 +9,15 @@ let isShuffle = false;
 let repeatMode = 'off'; // 'off' | 'all' | 'one'
 let progressInterval = null;
 let pendingVideoId = null;
+let hasActiveSong = false; // true once a song has actually been loaded
 
+// ===== DOM refs =====
 const playerView = document.getElementById('playerView');
+const miniPlayer = document.getElementById('miniPlayer');
+const miniCover = document.getElementById('miniCover');
+const miniTitle = document.getElementById('miniTitle');
+const miniArtist = document.getElementById('miniArtist');
+const miniPlayBtn = document.getElementById('miniPlayBtn');
 
 // ===== Extract YouTube Video ID =====
 function extractVideoId(url) {
@@ -30,17 +37,49 @@ function extractVideoId(url) {
 function showGallery() {
   playerView.classList.remove('active');
   document.body.classList.remove('player-open');
-  if (player && player.pauseVideo) player.pauseVideo();
+  // Music keeps playing in the background — show the mini-player
+  if (hasActiveSong && playerReady && player) {
+    showMiniPlayer();
+  }
 }
 
 function showPlayer() {
   playerView.classList.add('active');
   document.body.classList.add('player-open');
+  hideMiniPlayer();
 }
 
 // ===== Thumbnail helper =====
 function buildThumbUrl(videoId, quality) {
   return 'https://i.ytimg.com/vi/' + videoId + '/' + quality + '.jpg';
+}
+
+// ===== Mini player =====
+function updateMiniPlayer() {
+  const song = songs[currentIndex];
+  if (!song) return;
+
+  miniTitle.textContent = song.title;
+  miniArtist.textContent = song.artist || 'Nanatsukaze';
+
+  const videoId = extractVideoId(song.youtubeLink);
+  if (videoId) {
+    miniCover.src = buildThumbUrl(videoId, 'mqdefault');
+    miniCover.style.display = '';
+  } else {
+    miniCover.style.display = 'none';
+  }
+
+  miniPlayBtn.classList.toggle('playing', isPlaying);
+}
+
+function showMiniPlayer() {
+  updateMiniPlayer();
+  miniPlayer.classList.add('show');
+}
+
+function hideMiniPlayer() {
+  miniPlayer.classList.remove('show');
 }
 
 // ===== Gallery =====
@@ -88,6 +127,7 @@ function openSongFromGallery(index) {
   if (!videoId) return;
 
   currentIndex = index;
+  hasActiveSong = true;
   showPlayer();
 
   if (!playerReady || !player) {
@@ -156,14 +196,16 @@ function onPlayerError(event) {
   console.warn('YouTube player error:', event.data);
   const song = songs[currentIndex];
   const titleEl = document.getElementById('songTitle');
-  titleEl.textContent = song ? song.title + ' — unavailable' : 'Unavailable';
-  document.getElementById('songArtist').textContent = 'This video cannot be embedded';
+  if (titleEl && song) titleEl.textContent = song.title + ' — unavailable';
+  const artistEl = document.getElementById('songArtist');
+  if (artistEl) artistEl.textContent = 'This video cannot be embedded';
 }
 
 // ===== Player state =====
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
+    hasActiveSong = true;
     updatePlayButton();
     startProgressTimer();
   } else if (event.data === YT.PlayerState.PAUSED) {
@@ -187,6 +229,7 @@ function playSong(index) {
     return;
   }
   currentIndex = index;
+  hasActiveSong = true;
 
   if (playerReady && player) {
     player.loadVideoById(videoId);
@@ -251,9 +294,13 @@ function handleSongEnd() {
 // ===== UI =====
 function updatePlayButton() {
   const btn = document.getElementById('playBtn');
-  if (!btn) return;
-  btn.classList.toggle('playing', isPlaying);
-  btn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+  if (btn) {
+    btn.classList.toggle('playing', isPlaying);
+    btn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+  }
+  if (miniPlayBtn) {
+    miniPlayBtn.classList.toggle('playing', isPlaying);
+  }
 }
 
 function updateSongInfo() {
@@ -261,6 +308,7 @@ function updateSongInfo() {
   if (!song) return;
   document.getElementById('songTitle').textContent = song.title;
   document.getElementById('songArtist').textContent = song.artist || 'Nanatsukaze';
+  updateMiniPlayer();
 }
 
 function updatePlaylistHighlight() {
@@ -353,6 +401,25 @@ function bindEvents() {
 
   document.getElementById('backToGalleryBtn').addEventListener('click', function () {
     showGallery();
+  });
+
+  // ===== Mini-player interactions =====
+  miniPlayer.addEventListener('click', function (e) {
+    // Ignore clicks on the play button (it has its own handler)
+    if (e.target.closest('#miniPlayBtn')) return;
+    showPlayer();
+  });
+
+  miniPlayer.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target === miniPlayer) {
+      e.preventDefault();
+      showPlayer();
+    }
+  });
+
+  miniPlayBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    togglePlay();
   });
 
   document.addEventListener('keydown', function (e) {
