@@ -19,6 +19,10 @@
   --accent: #6366f1;
   --accent-light: #eef2ff;
   --accent-soft: #c7d2fe;
+  --accent-pink: #ec4899;
+  --accent-purple: #a855f7;
+  --accent-blue: #3b82f6;
+  --accent-amber: #f59e0b;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
   --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
@@ -30,11 +34,21 @@
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* =================================================================
+   BODY — Vibrant mesh gradient background
+   ================================================================= */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans', sans-serif;
-  background: var(--bg);
   color: var(--gray-700);
   min-height: 100vh;
+  background-color: #faf9fc;
+  background-image:
+    radial-gradient(at 12% 8%,  rgba(139, 92, 246, 0.22) 0px, transparent 45%),
+    radial-gradient(at 88% 4%,  rgba(236, 72, 153, 0.16) 0px, transparent 45%),
+    radial-gradient(at 4% 62%,  rgba(59, 130, 246, 0.18) 0px, transparent 45%),
+    radial-gradient(at 96% 72%, rgba(251, 191, 36, 0.14) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.14) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 body.player-open {
@@ -98,18 +112,22 @@ body.player-open {
 }
 
 .gallery-logo {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--gray-700);
+  font-size: 2.2rem;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .gallery-sub {
   font-size: 0.9rem;
-  color: var(--gray-400);
-  margin-top: 6px;
-  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  margin-top: 8px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  font-weight: 500;
 }
 
 .gallery-grid {
@@ -118,22 +136,21 @@ body.player-open {
   gap: 24px;
 }
 
+/* ==== Gallery card ==== */
 .gallery-card {
   background: var(--white);
   border-radius: var(--radius-sm);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08), 0 1px 3px rgba(0,0,0,0.04);
   cursor: pointer;
-  transition:
-    transform 0.35s var(--ease-bounce),
-    box-shadow 0.35s var(--ease-smooth);
-  border: 1px solid var(--gray-100);
+  transition: transform 0.35s var(--ease-bounce), box-shadow 0.35s var(--ease-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
 .gallery-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--accent-soft);
+  box-shadow: 0 24px 48px rgba(139, 92, 246, 0.28), 0 8px 20px rgba(236, 72, 153, 0.15);
+  border-color: rgba(199, 210, 254, 0.8);
 }
 
 .gallery-card:active {
@@ -171,7 +188,7 @@ body.player-open {
 .card-play-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.55), rgba(168, 85, 247, 0.55));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,26 +248,31 @@ body.player-open {
 }
 
 /* =================================================================
-   PLAYER VIEW
+   PLAYER VIEW — vibrant background
    ================================================================= */
 #playerView {
   position: fixed;
   inset: 0;
-  background: var(--bg);
   z-index: 100;
   overflow-y: auto;
   transform: translateY(100%);
-  transition:
-    transform 0.55s var(--ease-slide),
-    box-shadow 0.55s var(--ease-slide);
+  transition: transform 0.55s var(--ease-slide), box-shadow 0.55s var(--ease-slide);
   pointer-events: none;
   will-change: transform;
+  background-color: #faf9fc;
+  background-image:
+    radial-gradient(at 10% 10%, rgba(139, 92, 246, 0.28) 0px, transparent 50%),
+    radial-gradient(at 92% 8%, rgba(236, 72, 153, 0.22) 0px, transparent 50%),
+    radial-gradient(at 6% 82%, rgba(59, 130, 246, 0.22) 0px, transparent 50%),
+    radial-gradient(at 94% 92%, rgba(251, 191, 36, 0.18) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.12) 0px, transparent 60%);
+  background-attachment: fixed;
 }
 
 #playerView.active {
   transform: translateY(0);
   pointer-events: auto;
-  box-shadow: 0 -20px 60px rgba(0,0,0,0.1);
+  box-shadow: 0 -20px 60px rgba(99, 102, 241, 0.2);
 }
 
 .player-view-inner {
@@ -268,11 +290,15 @@ body.player-open {
   width: 100%;
   background: var(--white);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
+  box-shadow:
+    0 24px 60px rgba(99, 102, 241, 0.18),
+    0 8px 24px rgba(236, 72, 153, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 40px;
   height: 620px;
   max-height: calc(100vh - 48px);
   animation: playerCardIn 0.55s var(--ease-slide) both;
+  border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
 @keyframes playerCardIn {
@@ -302,12 +328,12 @@ body.player-open {
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: #000;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
   transition: box-shadow 0.3s ease;
 }
 
 .cover-wrap:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.28);
 }
 
 .youtube-player,
@@ -334,7 +360,7 @@ body.player-open {
 
 .song-info h1 {
   font-size: 1.35rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--gray-700);
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -375,7 +401,7 @@ input[type="range"] {
 }
 
 input[type="range"]:hover {
-  background: var(--gray-300);
+  background: linear-gradient(90deg, var(--accent), var(--accent-purple));
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -383,25 +409,25 @@ input[type="range"]::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, #6366f1, #a855f7);
   border: 2px solid var(--white);
-  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 1px 6px rgba(99, 102, 241, 0.5);
   cursor: pointer;
   transition: transform 0.2s var(--ease-bounce), box-shadow 0.2s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.3);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.7);
 }
 
 input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, #6366f1, #a855f7);
   border: 2px solid var(--white);
-  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 1px 6px rgba(99, 102, 241, 0.5);
   cursor: pointer;
 }
 
@@ -424,12 +450,8 @@ input[type="range"]::-moz-range-thumb {
   justify-content: center;
   color: var(--gray-600);
   cursor: pointer;
-  transition:
-    background 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    transform 0.3s var(--ease-bounce),
-    box-shadow 0.3s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+              transform 0.3s var(--ease-bounce), box-shadow 0.3s ease;
   box-shadow: var(--shadow-sm);
 }
 
@@ -438,7 +460,7 @@ input[type="range"]::-moz-range-thumb {
   border-color: var(--accent-soft);
   color: var(--accent);
   transform: translateY(-3px) scale(1.06);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
 }
 
 .ctrl-btn:active {
@@ -449,18 +471,18 @@ input[type="range"]::-moz-range-thumb {
 .ctrl-btn.primary {
   width: 56px;
   height: 56px;
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  border-color: transparent;
   color: var(--white);
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
 .ctrl-btn.primary:hover {
-  background: #5558e6;
-  border-color: #5558e6;
+  background: linear-gradient(135deg, #7c7ff5 0%, #b975f7 100%);
+  border-color: transparent;
   color: var(--white);
   transform: translateY(-3px) scale(1.1);
-  box-shadow: 0 10px 28px rgba(99, 102, 241, 0.45);
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.55);
 }
 
 .ctrl-btn.small {
@@ -514,42 +536,77 @@ input[type="range"]::-moz-range-thumb {
   margin-bottom: 16px;
   padding-left: 12px;
   flex-shrink: 0;
+  gap: 12px;
 }
 
 .playlist-header h2 {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--gray-500);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
+/* ==== Gallery button — vibrant, noticeable ==== */
 .back-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: none;
-  border: 1px solid var(--gray-200);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 0.72rem;
-  color: var(--gray-500);
+  gap: 7px;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.25s var(--ease-smooth);
+  transition: all 0.3s var(--ease-bounce);
   font-family: inherit;
+  box-shadow:
+    0 4px 14px rgba(99, 102, 241, 0.4),
+    0 2px 6px rgba(168, 85, 247, 0.25);
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+
+.back-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #7c7ff5 0%, #b975f7 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.back-btn > * {
+  position: relative;
+  z-index: 1;
 }
 
 .back-btn:hover {
-  background: var(--accent-light);
-  border-color: var(--accent-soft);
-  color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 10px 26px rgba(99, 102, 241, 0.55),
+    0 4px 12px rgba(236, 72, 153, 0.35);
+}
+
+.back-btn:hover::before {
+  opacity: 1;
+}
+
+.back-btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .back-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
+  transition: transform 0.3s var(--ease-bounce);
+}
+
+.back-btn:hover svg {
+  transform: rotate(-10deg) scale(1.15);
 }
 
 #playlist {
@@ -590,7 +647,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .playlist-item.active {
-  background: var(--accent-light);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
 }
 
 .playlist-item.active .item-title {
@@ -648,7 +705,7 @@ input[type="range"]::-moz-range-thumb {
 .playing-bar span {
   display: block;
   width: 3px;
-  background: var(--accent);
+  background: linear-gradient(180deg, #6366f1, #a855f7);
   border-radius: 1px;
   animation: bounce 0.8s ease-in-out infinite;
 }
@@ -673,7 +730,7 @@ input[type="range"]::-moz-range-thumb {
     gap: 16px;
   }
 
-  .gallery-logo { font-size: 1.5rem; }
+  .gallery-logo { font-size: 1.6rem; }
 
   .player-view-inner {
     padding: 0;
