@@ -62,10 +62,24 @@
       <div class="gallery-grid" id="galleryGrid"></div>
     </main>
 
-    <!-- ===== PLAYER (hidden attribute added here) ===== -->
     <section id="playerView" aria-hidden="true" hidden>
       <div class="player-view-inner">
-        <div class="player-layout">
+        <div class="player-layout" id="playerLayout">
+
+          <button id="toggleSidebarBtn" class="toggle-sidebar-btn"
+                  aria-label="Hide sidebar" aria-pressed="false" type="button">
+            <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="13 17 18 12 13 7"/>
+              <polyline points="6 17 11 12 6 7"/>
+            </svg>
+            <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="11 17 6 12 11 7"/>
+              <polyline points="18 17 13 12 18 7"/>
+            </svg>
+          </button>
+
           <div class="player-card">
             <div class="cover-wrap">
               <div id="player" class="youtube-player"></div>
@@ -140,8 +154,7 @@
           </div>
 
           <aside class="playlist-section">
-            <div class="playlist-header">
-              <h2>Playlist</h2>
+            <div class="playlist-top">
               <button id="backToGalleryBtn" class="back-btn" title="Back to Gallery" aria-label="Back to Gallery">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -153,8 +166,12 @@
                 <span>Gallery</span>
               </button>
             </div>
-            <ul id="playlist"></ul>
+            <div class="playlist-bottom">
+              <h2 class="playlist-title">Playlist</h2>
+              <ul id="playlist"></ul>
+            </div>
           </aside>
+
         </div>
       </div>
     </section>
