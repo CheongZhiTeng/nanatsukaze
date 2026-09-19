@@ -1,16 +1,24 @@
 // app.js
-let player;
+
+// ===== State =====
+let player = null;
+let playerReady = false;
 let currentIndex = 0;
 let isPlaying = false;
 let isShuffle = false;
 let repeatMode = 'off'; // 'off' | 'all' | 'one'
-let progressInterval;
+let progressInterval = null;
+let hasAutoPlayed = false;
 
-// ===== 提取 YouTube Video ID =====
+// ===== View elements =====
+const galleryView = document.getElementById('galleryView');
+const playerView = document.getElementById('playerView');
+
+// ===== Extract YouTube Video ID =====
 function extractVideoId(url) {
   if (!url) return null;
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
     /^([a-zA-Z0-9_-]{11})$/
   ];
   for (const p of patterns) {
@@ -20,7 +28,77 @@ function extractVideoId(url) {
   return null;
 }
 
-// ===== 初始化 YouTube IFrame API =====
+// ===== View Switching =====
+function showGallery() {
+  galleryView.classList.add('active');
+  playerView.classList.remove('active');
+  if (player && player.pauseVideo) player.pauseVideo();
+}
+
+function showPlayer() {
+  galleryView.classList.remove('active');
+  playerView.classList.add('active');
+}
+
+// ===== Gallery =====
+function renderGallery() {
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML = '';
+
+  songs.forEach(function (song, i) {
+    const videoId = extractVideoId(song.youtubeLink);
+    const card = document.createElement('div');
+    card.className = 'gallery-card' + (videoId ? '' : ' no-link');
+
+    const thumb = videoId
+      ? 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg'
+      : '';
+
+    card.innerHTML =
+      '<div class="card-cover">' +
+        (thumb ? '<img src="' + thumb + '" alt="' + song.title + '" loading="lazy">' : '') +
+        '<div class="card-play-overlay">' +
+          '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .82.88 1.32 1.57.9l10.97-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z"/></svg>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-info">' +
+        '<div class="card-title">' + song.title + '</div>' +
+        '<div class="card-artist">' + (song.artist || 'Nanatsukaze') + '</div>' +
+        (videoId ? '' : '<div class="card-badge">No link</div>') +
+      '</div>';
+
+    if (videoId) {
+      card.addEventListener('click', function () {
+        openSongFromGallery(i);
+      });
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+function openSongFromGallery(index) {
+  const videoId = extractVideoId(songs[index].youtubeLink);
+  if (!videoId) return;
+
+  currentIndex = index;
+  showPlayer();
+
+  // If player not ready yet, queue the video and play when ready
+  if (!playerReady || !player) {
+    pendingVideoId = videoId;
+    return;
+  }
+
+  player.loadVideoById(videoId);
+  updateSongInfo();
+  updatePlaylistHighlight();
+}
+
+// Track a pending video if the player isn't ready yet
+let pendingVideoId = null;
+
+// ===== YouTube API =====
 function loadYouTubeAPI() {
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
@@ -29,14 +107,15 @@ function loadYouTubeAPI() {
 }
 
 window.onYouTubeIframeAPIReady = function () {
-  const firstValid = songs.findIndex(s => extractVideoId(s.youtubeLink));
+  const firstValid = songs.findIndex(function (s) { return extractVideoId(s.youtubeLink); });
   if (firstValid === -1) {
-    document.getElementById('songTitle').textContent = '暂无可播放歌曲';
-    document.getElementById('songArtist').textContent = '请在 data.js 中填入 YouTube 链接';
+    document.getElementById('songTitle').textContent = 'No playable songs';
+    document.getElementById('songArtist').textContent = 'Add YouTube links in data.js';
     return;
   }
   currentIndex = firstValid;
   const videoId = extractVideoId(songs[currentIndex].youtubeLink);
+
   player = new YT.Player('player', {
     height: '100%',
     width: '100%',
@@ -49,23 +128,29 @@ window.onYouTubeIframeAPIReady = function () {
       showinfo: 0,
       iv_load_policy: 3,
       fs: 0,
-      color: 'white'
+      color: 'white',
+      origin: window.location.origin
     },
     events: {
-      'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange
     }
   });
-  renderPlaylist();
-  updateSongInfo();
 };
 
 function onPlayerReady() {
+  playerReady = true;
   player.setVolume(80);
   updateSongInfo();
+
+  // If the user clicked a gallery card before the player was ready
+  if (pendingVideoId) {
+    player.loadVideoById(pendingVideoId);
+    pendingVideoId = null;
+  }
 }
 
-// ===== 状态变化 =====
+// ===== Player state =====
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
@@ -82,24 +167,31 @@ function onPlayerStateChange(event) {
   updatePlaylistHighlight();
 }
 
-// ===== 播放控制 =====
+// ===== Playback control =====
 function playSong(index) {
   if (index < 0 || index >= songs.length) return;
   const videoId = extractVideoId(songs[index].youtubeLink);
   if (!videoId) {
-    // 跳过无链接的歌曲
     const next = findNextPlayable(index, 1);
     if (next !== -1 && next !== index) playSong(next);
     return;
   }
   currentIndex = index;
-  player.loadVideoById(videoId);
-  updateSongInfo();
-  updatePlaylistHighlight();
+
+  if (playerReady && player) {
+    player.loadVideoById(videoId);
+    updateSongInfo();
+    updatePlaylistHighlight();
+  } else {
+    pendingVideoId = videoId;
+  }
 }
 
 function togglePlay() {
-  if (!player || !player.getVideoData || !player.getVideoData().video_id) return;
+  if (!player || !playerReady) return;
+  const data = player.getVideoData();
+  if (!data || !data.video_id) return;
+
   if (isPlaying) {
     player.pauseVideo();
   } else {
@@ -127,7 +219,6 @@ function findNextPlayable(from, direction) {
       idx = (from + direction * step + len) % len;
     }
     if (idx === from && step > 0) {
-      // 只有一首可播放
       if (extractVideoId(songs[idx].youtubeLink)) return idx;
       continue;
     }
@@ -151,9 +242,12 @@ function handleSongEnd() {
   }
 }
 
-// ===== UI 更新 =====
+// ===== UI updates =====
 function updatePlayButton() {
-  document.getElementById('playBtn').textContent = isPlaying ? '⏸' : '▶';
+  const btn = document.getElementById('playBtn');
+  if (!btn) return;
+  btn.classList.toggle('playing', isPlaying);
+  btn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
 }
 
 function updateSongInfo() {
@@ -164,7 +258,7 @@ function updateSongInfo() {
 }
 
 function updatePlaylistHighlight() {
-  document.querySelectorAll('.playlist-item').forEach((el, i) => {
+  document.querySelectorAll('.playlist-item').forEach(function (el, i) {
     el.classList.toggle('active', i === currentIndex);
   });
 }
@@ -173,14 +267,14 @@ function formatTime(seconds) {
   if (!seconds || isNaN(seconds)) return '0:00';
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
-// ===== 进度条 =====
+// ===== Progress bar =====
 function startProgressTimer() {
   stopProgressTimer();
-  progressInterval = setInterval(() => {
-    if (!player || !player.getCurrentTime) return;
+  progressInterval = setInterval(function () {
+    if (!player || !playerReady || !player.getCurrentTime) return;
     const cur = player.getCurrentTime();
     const dur = player.getDuration();
     if (dur > 0) {
@@ -198,72 +292,74 @@ function stopProgressTimer() {
   }
 }
 
-// ===== 播放列表渲染 =====
+// ===== Playlist =====
 function renderPlaylist() {
   const ul = document.getElementById('playlist');
   ul.innerHTML = '';
-  songs.forEach((song, i) => {
+  songs.forEach(function (song, i) {
     const li = document.createElement('li');
     li.className = 'playlist-item';
     const hasLink = !!extractVideoId(song.youtubeLink);
-    li.innerHTML = `
-      <span class="item-index">${i + 1}</span>
-      <div class="item-info">
-        <div class="item-title">${song.title}${!hasLink ? ' <span style="font-size:0.7rem;color:var(--gray-300);">(无链接)</span>' : ''}</div>
-        <div class="item-artist">${song.artist || 'Nanatsukaze'}</div>
-      </div>
-      <div class="playing-bar"><span></span><span></span><span></span></div>
-    `;
-    li.addEventListener('click', () => {
-      if (hasLink) {
-        playSong(i);
-      }
+    li.innerHTML =
+      '<span class="item-index">' + (i + 1) + '</span>' +
+      '<div class="item-info">' +
+        '<div class="item-title">' + song.title + (hasLink ? '' : ' <span style="font-size:0.7rem;color:var(--gray-300);">(no link)</span>') + '</div>' +
+        '<div class="item-artist">' + (song.artist || 'Nanatsukaze') + '</div>' +
+      '</div>' +
+      '<div class="playing-bar"><span></span><span></span><span></span></div>';
+
+    li.addEventListener('click', function () {
+      if (hasLink) playSong(i);
     });
     ul.appendChild(li);
   });
 }
 
-// ===== 事件绑定 =====
+// ===== Event binding =====
 function bindEvents() {
   document.getElementById('playBtn').addEventListener('click', togglePlay);
   document.getElementById('nextBtn').addEventListener('click', nextSong);
   document.getElementById('prevBtn').addEventListener('click', prevSong);
 
-  // 进度条拖拽
-  document.getElementById('progressBar').addEventListener('input', (e) => {
-    if (!player || !player.getDuration) return;
+  document.getElementById('progressBar').addEventListener('input', function (e) {
+    if (!player || !playerReady || !player.getDuration) return;
     const dur = player.getDuration();
     if (dur > 0) {
-      const seekTo = (e.target.value / 100) * dur;
-      player.seekTo(seekTo, true);
+      player.seekTo((e.target.value / 100) * dur, true);
     }
   });
 
-  // 音量
-  document.getElementById('volumeBar').addEventListener('input', (e) => {
-    if (player && player.setVolume) {
+  document.getElementById('volumeBar').addEventListener('input', function (e) {
+    if (player && playerReady && player.setVolume) {
       player.setVolume(parseInt(e.target.value));
     }
   });
 
-  // 随机播放
   document.getElementById('shuffleBtn').addEventListener('click', function () {
     isShuffle = !isShuffle;
     this.classList.toggle('active', isShuffle);
   });
 
-  // 循环模式
   document.getElementById('repeatBtn').addEventListener('click', function () {
     const modes = ['off', 'all', 'one'];
     const idx = modes.indexOf(repeatMode);
     repeatMode = modes[(idx + 1) % modes.length];
     this.classList.toggle('active', repeatMode !== 'off');
-    this.textContent = repeatMode === 'one' ? '🔂' : '🔁';
-    this.title = repeatMode === 'one' ? '单曲循环' : repeatMode === 'all' ? '列表循环' : '循环关闭';
+    this.classList.toggle('one', repeatMode === 'one');
+    this.title = repeatMode === 'one' ? 'Repeat One'
+               : repeatMode === 'all' ? 'Repeat All'
+               : 'Repeat Off';
+  });
+
+  // Back to gallery
+  document.getElementById('backToGalleryBtn').addEventListener('click', function () {
+    showGallery();
   });
 }
 
-// ===== 启动 =====
+// ===== Init =====
 loadYouTubeAPI();
 bindEvents();
-
+renderGallery();
+renderPlaylist();
+updateSongInfo();
