@@ -34,7 +34,12 @@
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-html { overflow-x: hidden; }
+/* Prevent iOS rubber-band scroll from showing black gaps */
+html {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
 
 body {
   font-family: 'Michroma', -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -43,8 +48,10 @@ body {
   min-height: 100vh;
   background-color: #faf9fc;
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
+/* Static gradient — no will-change, no forced compositing layer */
 body::before {
   content: '';
   position: fixed;
@@ -57,8 +64,6 @@ body::before {
     radial-gradient(at 4% 62%,  rgba(59, 130, 246, 0.18) 0px, transparent 45%),
     radial-gradient(at 96% 72%, rgba(251, 191, 36, 0.14) 0px, transparent 45%),
     radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.14) 0px, transparent 50%);
-  will-change: transform;
-  transform: translateZ(0);
 }
 
 body.player-open { overflow: hidden; }
@@ -140,12 +145,10 @@ input:focus-visible,
   overflow: visible;
 }
 
-/* ==== Enlarged logo ==== */
 .gallery-logo {
   width: 280px;
   max-width: 100%;
   height: auto;
-  transform: scale(1.45);
   display: block;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
   transition: width 0.4s var(--ease-smooth);
@@ -186,8 +189,6 @@ input:focus-visible,
   outline: none;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
   transition: border-color 0.25s ease, box-shadow 0.3s ease, background 0.25s ease;
-  contain: layout style;
-  transform: translateZ(0);
 }
 
 .search-input::placeholder { color: var(--gray-400); }
@@ -251,8 +252,6 @@ input:focus-visible,
   text-decoration: none;
   transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease,
               transform 0.3s var(--ease-bounce), box-shadow 0.3s ease;
-  contain: layout style;
-  transform: translateZ(0);
 }
 
 .social-btn:hover {
@@ -281,7 +280,6 @@ input:focus-visible,
   cursor: pointer;
   transition: transform 0.35s var(--ease-bounce), box-shadow 0.35s var(--ease-smooth);
   border: 1px solid rgba(255, 255, 255, 0.9);
-  contain: layout style;
 }
 
 .gallery-card:hover {
@@ -451,6 +449,7 @@ input:focus-visible,
   min-height: 0;
   overflow-y: auto;
   padding-right: 4px;
+  transition: gap 0.45s var(--ease-slide);
 }
 
 .player-card::-webkit-scrollbar { width: 0; }
@@ -493,10 +492,17 @@ input:focus-visible,
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
 }
 
-/* SONG INFO */
+/* SONG INFO — smooth collapse transition */
 .song-info {
   text-align: center;
   padding: 0 8px;
+  max-height: 120px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    opacity 0.3s ease,
+    max-height 0.45s var(--ease-slide),
+    padding 0.45s var(--ease-slide);
 }
 
 .song-info h1 {
@@ -518,7 +524,7 @@ input:focus-visible,
   margin-top: 4px;
 }
 
-/* PROGRESS */
+/* PROGRESS — smooth collapse transition */
 .progress-wrap {
   display: flex;
   align-items: center;
@@ -526,6 +532,12 @@ input:focus-visible,
   font-size: 0.75rem;
   color: var(--gray-400);
   font-variant-numeric: tabular-nums;
+  max-height: 60px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    opacity 0.3s ease,
+    max-height 0.45s var(--ease-slide);
 }
 
 input[type="range"] {
@@ -571,14 +583,21 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-/* CONTROLS */
+/* CONTROLS — smooth collapse transition */
 .controls {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 16px;
   padding: 8px 0;
-  transition: gap 0.4s var(--ease-slide), padding 0.4s var(--ease-slide);
+  max-height: 120px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    opacity 0.3s ease,
+    max-height 0.45s var(--ease-slide),
+    gap 0.4s var(--ease-slide),
+    padding 0.45s var(--ease-slide);
 }
 
 .ctrl-btn {
@@ -894,7 +913,8 @@ input[type="range"]::-moz-range-thumb {
 .toggle-sidebar-btn.collapsed .icon-show { display: block; }
 
 /* =================================================================
-   FULL-SCREEN MODE (sidebar hidden) — buttons shrink + flatten
+   FULL-SCREEN MODE — hides sidebar, song info, progress, and controls
+   Only the video remains
    ================================================================= */
 .player-layout.sidebar-hidden .playlist-section {
   width: 0;
@@ -905,64 +925,18 @@ input[type="range"]::-moz-range-thumb {
   gap: 0;
 }
 
+.player-layout.sidebar-hidden .player-card {
+  gap: 0;
+}
+
+.player-layout.sidebar-hidden .song-info,
+.player-layout.sidebar-hidden .progress-wrap,
 .player-layout.sidebar-hidden .controls {
-  gap: 8px;
+  opacity: 0;
+  max-height: 0;
   padding: 0;
-}
-
-/* Buttons shrink to 28px and lose all decoration */
-.player-layout.sidebar-hidden .ctrl-btn {
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  color: var(--gray-500);
-}
-
-.player-layout.sidebar-hidden .ctrl-btn:hover {
-  background: var(--accent-light);
-  border-color: transparent;
-  color: var(--accent);
-  transform: scale(1.15);
-  box-shadow: none;
-}
-
-.player-layout.sidebar-hidden .ctrl-btn.primary {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #6366f1 0%, #b975f7 100%);
-  border-color: transparent;
-  color: var(--white);
-  box-shadow: none;
-}
-
-.player-layout.sidebar-hidden .ctrl-btn.primary:hover {
-  background: linear-gradient(135deg, #7c7ff5 0%, #b975f7 100%);
-  transform: scale(1.1);
-  box-shadow: none;
-}
-
-.player-layout.sidebar-hidden .ctrl-btn svg {
-  width: 13px;
-  height: 13px;
-}
-
-.player-layout.sidebar-hidden .ctrl-btn.primary svg {
-  width: 16px;
-  height: 16px;
-}
-
-.player-layout.sidebar-hidden .progress-wrap {
-  font-size: 0.7rem;
-}
-
-.player-layout.sidebar-hidden .song-info h1 {
-  font-size: 1.15rem;
-}
-
-.player-layout.sidebar-hidden .song-info p {
-  font-size: 0.78rem;
+  margin: 0;
+  pointer-events: none;
 }
 
 /* MINI PLAYER */
@@ -988,7 +962,6 @@ input[type="range"]::-moz-range-thumb {
   transition: transform 0.5s var(--ease-slide), opacity 0.4s ease, box-shadow 0.3s ease;
   pointer-events: none;
   will-change: transform, opacity;
-  contain: layout style;
 }
 
 .mini-player.show {
@@ -1111,7 +1084,6 @@ input[type="range"]::-moz-range-thumb {
   z-index: -1;
   pointer-events: none;
   display: block;
-  transform: translateZ(0);
 }
 
 .bg-grid {
@@ -1129,8 +1101,6 @@ input[type="range"]::-moz-range-thumb {
   animation: gridDrift 24s linear infinite;
   -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
   mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
-  will-change: transform;
-  transform: translateZ(0);
 }
 
 @keyframes gridDrift {
@@ -1155,6 +1125,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @media (max-width: 768px) {
+  /* ==== MOBILE: kill the animated background to fix scroll glitches ==== */
+  .bg-canvas { display: none !important; }
+  .bg-grid {
+    animation: none !important;
+    opacity: 0.6;
+  }
+
   #galleryView { padding: 32px 16px 48px; }
   .gallery-header { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding-bottom: 20px; margin-bottom: 28px; }
   .gallery-brand { align-items: center; }
@@ -1180,9 +1157,6 @@ input[type="range"]::-moz-range-thumb {
   .mini-play-btn { width: 40px; height: 40px; }
   .mini-open-btn { width: 34px; height: 34px; }
   .toggle-sidebar-btn { display: none; }
-
-  .player-layout.sidebar-hidden .ctrl-btn { width: 26px; height: 26px; }
-  .player-layout.sidebar-hidden .ctrl-btn.primary { width: 34px; height: 34px; }
 }
 
 @media (max-width: 700px) {
