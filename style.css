@@ -34,7 +34,6 @@
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Prevent iOS rubber-band scroll from showing black gaps */
 html {
   overflow-x: hidden;
   overscroll-behavior: none;
@@ -51,7 +50,6 @@ body {
   overscroll-behavior: none;
 }
 
-/* Static gradient — no will-change, no forced compositing layer */
 body::before {
   content: '';
   position: fixed;
@@ -73,8 +71,8 @@ a:focus-visible,
 input:focus-visible,
 .gallery-card:focus-visible,
 .playlist-item:focus-visible,
-.mini-play-btn:focus-visible,
-.mini-open-btn:focus-visible {
+.mini-player:focus-visible,
+.mini-play-btn:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
@@ -145,13 +143,16 @@ input:focus-visible,
   overflow: visible;
 }
 
+/* ==== Logo scaled 1.6× ==== */
 .gallery-logo {
   width: 280px;
   max-width: 100%;
   height: auto;
   display: block;
+  transform: scale(1.6);
+  transform-origin: left center;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
-  transition: width 0.4s var(--ease-smooth);
+  transition: transform 0.4s var(--ease-smooth);
 }
 
 /* SEARCH */
@@ -492,7 +493,7 @@ input:focus-visible,
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
 }
 
-/* SONG INFO — smooth collapse transition */
+/* SONG INFO */
 .song-info {
   text-align: center;
   padding: 0 8px;
@@ -524,7 +525,7 @@ input:focus-visible,
   margin-top: 4px;
 }
 
-/* PROGRESS — smooth collapse transition */
+/* PROGRESS */
 .progress-wrap {
   display: flex;
   align-items: center;
@@ -583,7 +584,7 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-/* CONTROLS — smooth collapse transition */
+/* CONTROLS */
 .controls {
   display: flex;
   justify-content: center;
@@ -914,7 +915,6 @@ input[type="range"]::-moz-range-thumb {
 
 /* =================================================================
    FULL-SCREEN MODE — hides sidebar, song info, progress, and controls
-   Only the video remains
    ================================================================= */
 .player-layout.sidebar-hidden .playlist-section {
   width: 0;
@@ -939,7 +939,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 
-/* MINI PLAYER */
+/* MINI PLAYER — whole card is clickable to open the player */
 .mini-player {
   position: fixed;
   bottom: 24px;
@@ -957,6 +957,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 20px 48px rgba(99, 102, 241, 0.25), 0 8px 20px rgba(236, 72, 153, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.9);
   z-index: 50;
+  cursor: pointer;
   transform: translateY(140%) scale(0.95);
   opacity: 0;
   transition: transform 0.5s var(--ease-slide), opacity 0.4s ease, box-shadow 0.3s ease;
@@ -971,8 +972,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .mini-player.show:hover {
-  transform: translateY(-3px) scale(1.015);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: 0 24px 56px rgba(99, 102, 241, 0.35), 0 12px 26px rgba(236, 72, 153, 0.22), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mini-player.show:active {
+  transform: translateY(-1px) scale(0.99);
 }
 
 .mini-cover {
@@ -1046,37 +1051,6 @@ input[type="range"]::-moz-range-thumb {
 .mini-play-btn.playing .mini-icon-play { display: none; }
 .mini-play-btn.playing .mini-icon-pause { display: block; }
 
-.mini-open-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--gray-200);
-  background: var(--white);
-  color: var(--gray-500);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 0;
-  transition: color 0.2s ease, border-color 0.2s ease, transform 0.25s var(--ease-bounce), box-shadow 0.25s ease;
-}
-
-.mini-open-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent-soft);
-  transform: scale(1.1);
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
-}
-
-.mini-open-btn:active { transform: scale(0.94); }
-
-.mini-open-btn svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
 /* BACKGROUND */
 .bg-canvas {
   position: fixed;
@@ -1125,7 +1099,6 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @media (max-width: 768px) {
-  /* ==== MOBILE: kill the animated background to fix scroll glitches ==== */
   .bg-canvas { display: none !important; }
   .bg-grid {
     animation: none !important;
@@ -1135,7 +1108,15 @@ input[type="range"]::-moz-range-thumb {
   #galleryView { padding: 32px 16px 48px; }
   .gallery-header { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding-bottom: 20px; margin-bottom: 28px; }
   .gallery-brand { align-items: center; }
-  .gallery-logo { width: 200px; max-width: 100%; }
+
+  /* Mobile: 200px base × 1.6 = 320px visual */
+  .gallery-logo {
+    width: 200px;
+    max-width: 100%;
+    transform: scale(1.6);
+    transform-origin: center center;
+  }
+
   .search-wrap { width: 100%; max-width: none; order: 0; }
   .search-input { height: 44px; font-size: 0.85rem; }
   .social-btn { width: 38px; height: 38px; border-radius: 10px; }
@@ -1155,7 +1136,6 @@ input[type="range"]::-moz-range-thumb {
   .mini-player { bottom: 16px; right: 16px; left: 16px; width: auto; max-width: none; padding: 10px; }
   .mini-cover { width: 44px; height: 44px; }
   .mini-play-btn { width: 40px; height: 40px; }
-  .mini-open-btn { width: 34px; height: 34px; }
   .toggle-sidebar-btn { display: none; }
 }
 
