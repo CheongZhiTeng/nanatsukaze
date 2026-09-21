@@ -140,12 +140,14 @@ input:focus-visible,
   overflow: visible;
 }
 
+/* ==== Enlarged logo ==== */
 .gallery-logo {
-  width: 200px;
+  width: 280px;
   max-width: 100%;
   height: auto;
   display: block;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
+  transition: width 0.4s var(--ease-smooth);
 }
 
 /* SEARCH */
@@ -890,7 +892,9 @@ input[type="range"]::-moz-range-thumb {
 .toggle-sidebar-btn.collapsed .icon-hide { display: none; }
 .toggle-sidebar-btn.collapsed .icon-show { display: block; }
 
-/* FULL-SCREEN MODE (sidebar hidden) */
+/* =================================================================
+   FULL-SCREEN MODE (sidebar hidden) — buttons shrink + flatten
+   ================================================================= */
 .player-layout.sidebar-hidden .playlist-section {
   width: 0;
   padding-left: 0;
@@ -901,29 +905,31 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .player-layout.sidebar-hidden .controls {
-  gap: 10px;
-  padding: 2px 0;
+  gap: 8px;
+  padding: 0;
 }
 
+/* Buttons shrink to 28px and lose all decoration */
 .player-layout.sidebar-hidden .ctrl-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
+  color: var(--gray-500);
 }
 
 .player-layout.sidebar-hidden .ctrl-btn:hover {
   background: var(--accent-light);
   border-color: transparent;
   color: var(--accent);
-  transform: scale(1.12);
+  transform: scale(1.15);
   box-shadow: none;
 }
 
 .player-layout.sidebar-hidden .ctrl-btn.primary {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #6366f1 0%, #b975f7 100%);
   border-color: transparent;
   color: var(--white);
@@ -932,22 +938,30 @@ input[type="range"]::-moz-range-thumb {
 
 .player-layout.sidebar-hidden .ctrl-btn.primary:hover {
   background: linear-gradient(135deg, #7c7ff5 0%, #b975f7 100%);
-  transform: scale(1.08);
+  transform: scale(1.1);
   box-shadow: none;
 }
 
 .player-layout.sidebar-hidden .ctrl-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
 }
 
 .player-layout.sidebar-hidden .ctrl-btn.primary svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .player-layout.sidebar-hidden .progress-wrap {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
+}
+
+.player-layout.sidebar-hidden .song-info h1 {
+  font-size: 1.15rem;
+}
+
+.player-layout.sidebar-hidden .song-info p {
+  font-size: 0.78rem;
 }
 
 /* MINI PLAYER */
@@ -1143,7 +1157,7 @@ input[type="range"]::-moz-range-thumb {
   #galleryView { padding: 32px 16px 48px; }
   .gallery-header { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding-bottom: 20px; margin-bottom: 28px; }
   .gallery-brand { align-items: center; }
-  .gallery-logo { width: 150px; max-width: 100%; }
+  .gallery-logo { width: 200px; max-width: 100%; }
   .search-wrap { width: 100%; max-width: none; order: 0; }
   .search-input { height: 44px; font-size: 0.85rem; }
   .social-btn { width: 38px; height: 38px; border-radius: 10px; }
@@ -1165,6 +1179,9 @@ input[type="range"]::-moz-range-thumb {
   .mini-play-btn { width: 40px; height: 40px; }
   .mini-open-btn { width: 34px; height: 34px; }
   .toggle-sidebar-btn { display: none; }
+
+  .player-layout.sidebar-hidden .ctrl-btn { width: 26px; height: 26px; }
+  .player-layout.sidebar-hidden .ctrl-btn.primary { width: 34px; height: 34px; }
 }
 
 @media (max-width: 700px) {
