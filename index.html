@@ -177,7 +177,8 @@
     </section>
   </div>
 
-  <div id="miniPlayer" class="mini-player" aria-label="Mini player">
+  <!-- ===== Mini Player — clickable to open the player ===== -->
+  <div id="miniPlayer" class="mini-player" role="button" tabindex="0" aria-label="Open player">
     <img id="miniCover" class="mini-cover" src="" alt="">
     <div class="mini-info">
       <div id="miniTitle" class="mini-title">—</div>
@@ -190,15 +191,6 @@
       <svg class="mini-icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <rect x="7" y="5" width="3.5" height="14" rx="1.25"/>
         <rect x="13.5" y="5" width="3.5" height="14" rx="1.25"/>
-      </svg>
-    </button>
-    <button id="openPlayerBtn" class="mini-open-btn" type="button" aria-label="Open player">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <polyline points="15 3 21 3 21 9"/>
-        <polyline points="9 21 3 21 3 15"/>
-        <line x1="21" y1="3" x2="14" y2="10"/>
-        <line x1="3" y1="21" x2="10" y2="14"/>
       </svg>
     </button>
   </div>
