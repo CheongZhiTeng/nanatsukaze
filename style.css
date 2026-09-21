@@ -145,6 +145,7 @@ input:focus-visible,
   width: 280px;
   max-width: 100%;
   height: auto;
+  transform: scale(1.45);
   display: block;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
   transition: width 0.4s var(--ease-smooth);
