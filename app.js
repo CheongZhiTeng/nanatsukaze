@@ -497,7 +497,7 @@ function bindEvents() {
     showPlayer();
   });
 
-  // Sidebar toggle
+  // ===== Sidebar toggle + background control =====
   const playerLayout = document.getElementById('playerLayout');
   const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
 
@@ -507,6 +507,15 @@ function bindEvents() {
       this.classList.toggle('collapsed', isHidden);
       this.setAttribute('aria-pressed', isHidden);
       this.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
+
+      // Stop the particle background in full-screen mode, restart when exiting
+      if (window.bgParticles) {
+        if (isHidden) {
+          window.bgParticles.stop();
+        } else {
+          window.bgParticles.start();
+        }
+      }
     });
   }
 
@@ -671,6 +680,12 @@ updateSongInfo();
     if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
   }
+
+  // ===== Expose controls globally so the sidebar toggle can pause/resume =====
+  window.bgParticles = {
+    start: start,
+    stop: stop
+  };
 
   let resizeTimer = null;
   window.addEventListener('resize', function () {
