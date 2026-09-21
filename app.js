@@ -21,7 +21,6 @@ const miniCover = document.getElementById('miniCover');
 const miniTitle = document.getElementById('miniTitle');
 const miniArtist = document.getElementById('miniArtist');
 const miniPlayBtn = document.getElementById('miniPlayBtn');
-const openPlayerBtn = document.getElementById('openPlayerBtn');
 const searchInput = document.getElementById('searchInput');
 
 // ===== Extract YouTube Video ID =====
@@ -53,9 +52,7 @@ function showGallery() {
   playerView.hidden = true;
   playerView.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('player-open');
-  if (hasActiveSong && playerReady && player) {
-    showMiniPlayer();
-  }
+  if (hasActiveSong && playerReady && player) showMiniPlayer();
 }
 
 function showPlayer() {
@@ -65,7 +62,6 @@ function showPlayer() {
   hideMiniPlayer();
 }
 
-// ===== Thumbnail helper =====
 function buildThumbUrl(videoId, quality) {
   return 'https://i.ytimg.com/vi/' + videoId + '/' + quality + '.jpg';
 }
@@ -98,12 +94,20 @@ function hideMiniPlayer() {
 // ===== Gallery =====
 function renderGallery() {
   const grid = document.getElementById('galleryGrid');
+  if (!grid) return;
+
+  if (typeof songs === 'undefined' || !Array.isArray(songs)) {
+    grid.innerHTML = '<div class="no-results"><strong>data.js failed to load</strong>Check that data.js exists and has no syntax errors.</div>';
+    console.error('songs is not defined or not an array');
+    return;
+  }
+
   grid.innerHTML = '';
   const q = searchQuery.trim().toLowerCase();
   let visibleCount = 0;
 
   songs.forEach(function (song, i) {
-    const title = song.title.toLowerCase();
+    const title = (song.title || '').toLowerCase();
     const artist = (song.artist || '').toLowerCase();
     if (q && !title.includes(q) && !artist.includes(q)) return;
 
@@ -187,10 +191,7 @@ function openSongFromGallery(index) {
   hasActiveSong = true;
   errorSkipCount = 0;
   showPlayer();
-  if (!playerReady || !player) {
-    pendingVideoId = videoId;
-    return;
-  }
+  if (!playerReady || !player) { pendingVideoId = videoId; return; }
   player.loadVideoById(videoId);
   updateSongInfo();
   updatePlaylistHighlight();
@@ -347,9 +348,7 @@ function updatePlayButton() {
     btn.classList.toggle('playing', isPlaying);
     btn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
   }
-  if (miniPlayBtn) {
-    miniPlayBtn.classList.toggle('playing', isPlaying);
-  }
+  if (miniPlayBtn) miniPlayBtn.classList.toggle('playing', isPlaying);
 }
 
 function updateSongInfo() {
@@ -388,15 +387,15 @@ function startProgressTimer() {
 }
 
 function stopProgressTimer() {
-  if (progressInterval) {
-    clearInterval(progressInterval);
-    progressInterval = null;
-  }
+  if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
 }
 
 function renderPlaylist() {
   const ul = document.getElementById('playlist');
+  if (!ul) return;
   ul.innerHTML = '';
+  if (typeof songs === 'undefined' || !Array.isArray(songs)) return;
+
   songs.forEach(function (song, i) {
     const li = document.createElement('li');
     li.className = 'playlist-item';
@@ -445,76 +444,94 @@ function renderPlaylist() {
 }
 
 function bindEvents() {
-  document.getElementById('playBtn').addEventListener('click', togglePlay);
-  document.getElementById('nextBtn').addEventListener('click', nextSong);
-  document.getElementById('prevBtn').addEventListener('click', prevSong);
+  const playBtn = document.getElementById('playBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const progressBar = document.getElementById('progressBar');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const repeatBtn = document.getElementById('repeatBtn');
+  const backBtn = document.getElementById('backToGalleryBtn');
 
-  document.getElementById('progressBar').addEventListener('input', function (e) {
-    if (!player || !playerReady || !player.getDuration) return;
-    const dur = player.getDuration();
-    if (dur > 0) player.seekTo((e.target.value / 100) * dur, true);
-  });
+  if (playBtn) playBtn.addEventListener('click', togglePlay);
+  if (nextBtn) nextBtn.addEventListener('click', nextSong);
+  if (prevBtn) prevBtn.addEventListener('click', prevSong);
 
-  document.getElementById('shuffleBtn').addEventListener('click', function () {
-    isShuffle = !isShuffle;
-    this.classList.toggle('active', isShuffle);
-    this.setAttribute('aria-pressed', isShuffle);
-  });
+  if (progressBar) {
+    progressBar.addEventListener('input', function (e) {
+      if (!player || !playerReady || !player.getDuration) return;
+      const dur = player.getDuration();
+      if (dur > 0) player.seekTo((e.target.value / 100) * dur, true);
+    });
+  }
 
-  document.getElementById('repeatBtn').addEventListener('click', function () {
-    const modes = ['off', 'all', 'one'];
-    const idx = modes.indexOf(repeatMode);
-    repeatMode = modes[(idx + 1) % modes.length];
-    this.classList.toggle('active', repeatMode !== 'off');
-    this.classList.toggle('one', repeatMode === 'one');
-    this.setAttribute('aria-pressed', repeatMode !== 'off');
-    this.title = repeatMode === 'one' ? 'Repeat One'
-               : repeatMode === 'all' ? 'Repeat All'
-               : 'Repeat Off';
-  });
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', function () {
+      isShuffle = !isShuffle;
+      this.classList.toggle('active', isShuffle);
+      this.setAttribute('aria-pressed', isShuffle);
+    });
+  }
 
-  document.getElementById('backToGalleryBtn').addEventListener('click', showGallery);
+  if (repeatBtn) {
+    repeatBtn.addEventListener('click', function () {
+      const modes = ['off', 'all', 'one'];
+      const idx = modes.indexOf(repeatMode);
+      repeatMode = modes[(idx + 1) % modes.length];
+      this.classList.toggle('active', repeatMode !== 'off');
+      this.classList.toggle('one', repeatMode === 'one');
+      this.setAttribute('aria-pressed', repeatMode !== 'off');
+      this.title = repeatMode === 'one' ? 'Repeat One'
+                 : repeatMode === 'all' ? 'Repeat All'
+                 : 'Repeat Off';
+    });
+  }
 
-  searchInput.addEventListener('input', function () {
-    searchQuery = this.value;
-    renderGallery();
-  });
+  if (backBtn) backBtn.addEventListener('click', showGallery);
 
-  searchInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-      e.preventDefault();
-      this.blur();
-    }
-  });
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      searchQuery = this.value;
+      renderGallery();
+    });
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        e.preventDefault();
+        this.blur();
+      }
+    });
+  }
 
-  miniPlayBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    togglePlay();
-  });
+  if (miniPlayer) {
+    miniPlayer.addEventListener('click', function (e) {
+      if (e.target.closest('#miniPlayBtn')) return;
+      showPlayer();
+    });
+    miniPlayer.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === miniPlayer) {
+        e.preventDefault();
+        showPlayer();
+      }
+    });
+  }
 
-  openPlayerBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    showPlayer();
-  });
+  if (miniPlayBtn) {
+    miniPlayBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      togglePlay();
+    });
+  }
 
-  // ===== Sidebar toggle + background control =====
   const playerLayout = document.getElementById('playerLayout');
   const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-
   if (toggleSidebarBtn && playerLayout) {
     toggleSidebarBtn.addEventListener('click', function () {
       const isHidden = playerLayout.classList.toggle('sidebar-hidden');
       this.classList.toggle('collapsed', isHidden);
       this.setAttribute('aria-pressed', isHidden);
       this.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
-
-      // Stop the particle background in full-screen mode, restart when exiting
       if (window.bgParticles) {
-        if (isHidden) {
-          window.bgParticles.stop();
-        } else {
-          window.bgParticles.start();
-        }
+        if (isHidden) window.bgParticles.stop();
+        else window.bgParticles.start();
       }
     });
   }
@@ -525,17 +542,26 @@ function bindEvents() {
 }
 
 // ===== Init =====
-loadYouTubeAPI();
-bindEvents();
-renderGallery();
-renderPlaylist();
-updateSongInfo();
+try {
+  loadYouTubeAPI();
+  bindEvents();
+  renderGallery();
+  renderPlaylist();
+  updateSongInfo();
+} catch (err) {
+  console.error('Init failed:', err);
+  const grid = document.getElementById('galleryGrid');
+  if (grid) {
+    grid.innerHTML = '<div class="no-results"><strong>Script error</strong>' + err.message + '</div>';
+  }
+}
 
 // ===== Animated background =====
 (function initBackgroundParticles() {
   const canvas = document.getElementById('bgCanvas');
   if (!canvas) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.matchMedia('(max-width: 768px)').matches) return;
 
   const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
   let particles = [];
@@ -681,11 +707,7 @@ updateSongInfo();
     rafId = null;
   }
 
-  // ===== Expose controls globally so the sidebar toggle can pause/resume =====
-  window.bgParticles = {
-    start: start,
-    stop: stop
-  };
+  window.bgParticles = { start: start, stop: stop };
 
   let resizeTimer = null;
   window.addEventListener('resize', function () {
