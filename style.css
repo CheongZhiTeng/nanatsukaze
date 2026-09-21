@@ -121,7 +121,7 @@ input:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
   padding: 8px 0 24px;
   margin-bottom: 40px;
   border-bottom: 1px solid rgba(139, 92, 246, 0.12);
@@ -139,20 +139,19 @@ input:focus-visible,
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  max-width: 100%;
   overflow: visible;
 }
 
-/* ==== Logo scaled 1.6× ==== */
+/* Real 1.6× size — width reserves layout space so nothing overlaps */
 .gallery-logo {
-  width: 280px;
+  width: 320px;
   max-width: 100%;
   height: auto;
   display: block;
-  transform: scale(1.6);
-  transform-origin: left center;
   filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.2));
-  transition: transform 0.4s var(--ease-smooth);
+  transition: width 0.4s var(--ease-smooth);
 }
 
 /* SEARCH */
@@ -913,9 +912,7 @@ input[type="range"]::-moz-range-thumb {
 .toggle-sidebar-btn.collapsed .icon-hide { display: none; }
 .toggle-sidebar-btn.collapsed .icon-show { display: block; }
 
-/* =================================================================
-   FULL-SCREEN MODE — hides sidebar, song info, progress, and controls
-   ================================================================= */
+/* FULL-SCREEN MODE */
 .player-layout.sidebar-hidden .playlist-section {
   width: 0;
   padding-left: 0;
@@ -939,7 +936,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 
-/* MINI PLAYER — whole card is clickable to open the player */
+/* MINI PLAYER */
 .mini-player {
   position: fixed;
   bottom: 24px;
@@ -1092,10 +1089,27 @@ input[type="range"]::-moz-range-thumb {
   .bg-grid { animation: none; }
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .gallery-header { flex-wrap: wrap; justify-content: center; }
-  .search-wrap { order: 3; flex-basis: 100%; max-width: 100%; }
+/* =================================================================
+   RESPONSIVE
+   ================================================================= */
+
+/* Tablet / medium widths — stack search below logo, prevent overlap */
+@media (max-width: 1024px) {
+  .gallery-header {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .gallery-logo {
+    width: 260px;
+  }
+
+  .search-wrap {
+    order: 3;
+    flex-basis: 100%;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1106,41 +1120,129 @@ input[type="range"]::-moz-range-thumb {
   }
 
   #galleryView { padding: 32px 16px 48px; }
-  .gallery-header { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding-bottom: 20px; margin-bottom: 28px; }
-  .gallery-brand { align-items: center; }
 
-  /* Mobile: 200px base × 1.6 = 320px visual */
-  .gallery-logo {
-    width: 200px;
+  .gallery-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+
+  .gallery-brand {
+    align-items: center;
     max-width: 100%;
-    transform: scale(1.6);
-    transform-origin: center center;
+  }
+
+  .gallery-logo {
+    width: 220px;
+    max-width: 100%;
   }
 
   .search-wrap { width: 100%; max-width: none; order: 0; }
   .search-input { height: 44px; font-size: 0.85rem; }
+
+  .social-links {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
   .social-btn { width: 38px; height: 38px; border-radius: 10px; }
   .social-btn svg { width: 16px; height: 16px; }
-  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
   .player-view-inner { padding: 0; align-items: flex-start; }
-  .player-layout { flex-direction: column; border-radius: 0; padding: 24px 20px; height: auto; max-height: none; min-height: 100vh; gap: 24px; }
+
+  .player-layout {
+    flex-direction: column;
+    border-radius: 0;
+    padding: 24px 20px;
+    height: auto;
+    max-height: none;
+    min-height: 100vh;
+    gap: 24px;
+  }
+
   .player-card { overflow-y: visible; padding-right: 0; }
-  .playlist-section { width: 100%; border-left: none; padding-left: 0; border-top: 1px solid var(--gray-100); padding-top: 24px; gap: 16px; }
+
+  .playlist-section {
+    width: 100%;
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--gray-100);
+    padding-top: 24px;
+    gap: 16px;
+  }
+
   .playlist-top { padding-right: 0; justify-content: flex-start; }
   .playlist-bottom { max-height: 340px; }
+
   .ctrl-btn { width: 42px; height: 42px; }
   .ctrl-btn.primary { width: 54px; height: 54px; }
   .ctrl-btn svg { width: 18px; height: 18px; }
   .ctrl-btn.primary svg { width: 22px; height: 22px; }
+
   .splash-logo { max-width: 180px; }
-  .mini-player { bottom: 16px; right: 16px; left: 16px; width: auto; max-width: none; padding: 10px; }
+
+  .mini-player {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+    padding: 10px;
+  }
+
   .mini-cover { width: 44px; height: 44px; }
   .mini-play-btn { width: 40px; height: 40px; }
   .toggle-sidebar-btn { display: none; }
 }
 
 @media (max-width: 700px) {
-  .player-layout { flex-direction: column; height: auto; max-height: none; padding: 20px; }
-  .playlist-section { width: 100%; border-left: 0; border-top: 1px solid var(--gray-100); padding: 20px 0 0; }
-  .player-view-inner { align-items: flex-start; padding: 12px; }
+  .player-layout {
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    padding: 20px;
+  }
+
+  .playlist-section {
+    width: 100%;
+    border-left: 0;
+    border-top: 1px solid var(--gray-100);
+    padding: 20px 0 0;
+  }
+
+  .player-view-inner {
+    align-items: flex-start;
+    padding: 12px;
+  }
+}
+
+/* Short landscape phones (e.g. iPhone rotated) — make sure the header doesn't eat the screen */
+@media (max-height: 500px) and (orientation: landscape) {
+  .gallery-header {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+
+  .gallery-brand { max-width: 40%; }
+  .gallery-logo { width: 160px; }
+
+  .search-wrap {
+    order: 0;
+    flex-basis: auto;
+    max-width: none;
+    flex: 1;
+  }
+
+  #galleryView { padding: 16px 16px 32px; }
 }
