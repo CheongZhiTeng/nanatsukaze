@@ -521,6 +521,7 @@ function bindEvents() {
     });
   }
 
+  // ===== Sidebar toggle — also toggles fullscreen-mode on body =====
   const playerLayout = document.getElementById('playerLayout');
   const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
   if (toggleSidebarBtn && playerLayout) {
@@ -529,6 +530,10 @@ function bindEvents() {
       this.classList.toggle('collapsed', isHidden);
       this.setAttribute('aria-pressed', isHidden);
       this.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
+
+      // Disable ALL effects (particles, grid, blurs, shadows) in fullscreen
+      document.body.classList.toggle('fullscreen-mode', isHidden);
+
       if (window.bgParticles) {
         if (isHidden) window.bgParticles.stop();
         else window.bgParticles.start();
@@ -695,6 +700,8 @@ try {
 
   function start() {
     if (running) return;
+    // Don't restart if we're in fullscreen mode
+    if (document.body.classList.contains('fullscreen-mode')) return;
     running = true;
     lastFrameTime = 0;
     lastTimestamp = 0;
