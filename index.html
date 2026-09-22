@@ -4,9 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nanatsukaze · Music</title>
-  <link rel="stylesheet" href="style.css">
+
+  <!-- Preconnect to YouTube + Google infrastructure -->
+  <link rel="preconnect" href="https://www.youtube.com">
+  <link rel="preconnect" href="https://www.youtube-nocookie.com">
+  <link rel="preconnect" href="https://youtubei.googleapis.com">
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <link rel="preconnect" href="https://yt3.ggpht.com">
+  <link rel="preconnect" href="https://googlevideo.com" crossorigin>
+  <link rel="preconnect" href="https://www.google.com">
+  <link rel="preconnect" href="https://static.doubleclick.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- DNS fallback for browsers that skip preconnect -->
+  <link rel="dns-prefetch" href="https://www.youtube.com">
+  <link rel="dns-prefetch" href="https://www.youtube-nocookie.com">
+  <link rel="dns-prefetch" href="https://i.ytimg.com">
+  <link rel="dns-prefetch" href="https://yt3.ggpht.com">
+  <link rel="dns-prefetch" href="https://googlevideo.com">
+
+  <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Michroma:ital,wght@0,400&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -177,7 +195,6 @@
     </section>
   </div>
 
-  <!-- ===== Mini Player — clickable to open the player ===== -->
   <div id="miniPlayer" class="mini-player" role="button" tabindex="0" aria-label="Open player">
     <img id="miniCover" class="mini-cover" src="" alt="">
     <div class="mini-info">
