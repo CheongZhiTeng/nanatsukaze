@@ -34,10 +34,11 @@
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* ==== SCROLL FIX ====
+   Keep overflow rules simple. `overscroll-behavior: none` on the html
+   element was blocking wheel/touch scrolling on iPad + some desktops. */
 html {
-  overflow-x: hidden;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
+  /* intentionally empty — no overflow, no overscroll, no -webkit-overflow-scrolling */
 }
 
 body {
@@ -47,7 +48,6 @@ body {
   min-height: 100vh;
   background-color: #faf9fc;
   overflow-x: hidden;
-  overscroll-behavior: none;
 }
 
 body::before {
@@ -936,6 +936,44 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 
+/* ==== DISABLE ALL EFFECTS IN FULLSCREEN ====
+   When body has .fullscreen-mode, everything decorative is turned off:
+   particle canvas, grid animation, blurs, transitions on the player. */
+body.fullscreen-mode .bg-canvas {
+  display: none !important;
+}
+
+body.fullscreen-mode .bg-grid {
+  animation: none !important;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+body.fullscreen-mode #playerView {
+  background-image: none;
+  background-color: #ffffff;
+}
+
+body.fullscreen-mode .player-layout {
+  box-shadow: none;
+  border-color: transparent;
+  transition: none;
+}
+
+body.fullscreen-mode .cover-wrap,
+body.fullscreen-mode .cover-wrap:hover {
+  box-shadow: none;
+  transition: none;
+}
+
+body.fullscreen-mode .toggle-sidebar-btn {
+  box-shadow: none;
+}
+
+body.fullscreen-mode .toggle-sidebar-btn:hover {
+  box-shadow: none;
+}
+
 /* MINI PLAYER */
 .mini-player {
   position: fixed;
@@ -1089,11 +1127,7 @@ input[type="range"]::-moz-range-thumb {
   .bg-grid { animation: none; }
 }
 
-/* =================================================================
-   RESPONSIVE
-   ================================================================= */
-
-/* Tablet / medium widths — stack search below logo, prevent overlap */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
   .gallery-header {
     flex-wrap: wrap;
@@ -1224,7 +1258,6 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* Short landscape phones (e.g. iPhone rotated) — make sure the header doesn't eat the screen */
 @media (max-height: 500px) and (orientation: landscape) {
   .gallery-header {
     flex-direction: row;
