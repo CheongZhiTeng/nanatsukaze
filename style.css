@@ -34,13 +34,6 @@
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* ==== SCROLL FIX ====
-   Keep overflow rules simple. `overscroll-behavior: none` on the html
-   element was blocking wheel/touch scrolling on iPad + some desktops. */
-html {
-  /* intentionally empty — no overflow, no overscroll, no -webkit-overflow-scrolling */
-}
-
 body {
   font-family: 'Michroma', -apple-system, BlinkMacSystemFont, 'Segoe UI',
                'PingFang SC', 'Hiragino Sans', sans-serif;
@@ -144,7 +137,6 @@ input:focus-visible,
   overflow: visible;
 }
 
-/* Real 1.6× size — width reserves layout space so nothing overlaps */
 .gallery-logo {
   width: 320px;
   max-width: 100%;
@@ -936,9 +928,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 
-/* ==== DISABLE ALL EFFECTS IN FULLSCREEN ====
-   When body has .fullscreen-mode, everything decorative is turned off:
-   particle canvas, grid animation, blurs, transitions on the player. */
+/* DISABLE ALL EFFECTS IN FULLSCREEN */
 body.fullscreen-mode .bg-canvas {
   display: none !important;
 }
@@ -1234,7 +1224,19 @@ body.fullscreen-mode .toggle-sidebar-btn:hover {
 
   .mini-cover { width: 44px; height: 44px; }
   .mini-play-btn { width: 40px; height: 40px; }
-  .toggle-sidebar-btn { display: none; }
+
+  /* ==== Sidebar toggle — stay visible on mobile, just repositioned ==== */
+  .toggle-sidebar-btn {
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .toggle-sidebar-btn svg {
+    width: 15px;
+    height: 15px;
+  }
 }
 
 @media (max-width: 700px) {
