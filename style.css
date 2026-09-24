@@ -8,24 +8,20 @@
 }
 
 :root {
-  /* 暗黑主题基础色 */
   --bg-base: #0d0815;
   --bg-card: rgba(25, 18, 38, 0.85);
   --bg-input: rgba(20, 15, 30, 0.9);
   --bg-elevated: rgba(35, 25, 50, 0.9);
 
-  /* 霓虹强调色 */
   --accent-pink: #ff4d94;
   --accent-red: #ff3344;
   --accent-purple: #a855f7;
   --accent-white: #ffffff;
 
-  /* 文字颜色 */
   --text-main: #f0edf5;
   --text-muted: #9a8fa6;
   --text-dim: #6b5e75;
 
-  /* 描边 */
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-medium: rgba(255, 255, 255, 0.1);
   --border-neon: rgba(255, 77, 148, 0.35);
@@ -165,20 +161,7 @@ select:focus-visible,
 }
 
 /* =================================================================
-   粒子 Canvas
-   ================================================================= */
-.bg-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  display: block;
-  contain: strict;
-  transform: translateZ(0);
-}
-
-/* =================================================================
-   SPLASH
+   SPLASH — logo 反色
    ================================================================= */
 #splash {
   position: fixed;
@@ -199,7 +182,8 @@ select:focus-visible,
   opacity: 0;
   transform: scale(1);
   animation: logoIn 1.2s ease forwards;
-  filter: drop-shadow(0 0 40px rgba(255, 77, 148, 0.6));
+  /* 反色 + 霓虹粉光晕 */
+  filter: invert(1) drop-shadow(0 0 40px rgba(255, 77, 148, 0.6));
 }
 
 @keyframes logoIn {
@@ -1041,7 +1025,6 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 
-body.fullscreen-mode .bg-canvas,
 body.fullscreen-mode .flame-container,
 body.fullscreen-mode .neon-bg {
   display: none !important;
@@ -1068,11 +1051,6 @@ body.fullscreen-mode .cover-wrap:hover {
 
 body.fullscreen-mode .toggle-sidebar-btn {
   box-shadow: 0 0 15px rgba(255, 77, 148, 0.5);
-}
-
-/* 滚动时暂停动画 */
-body.is-scrolling .bg-canvas {
-  pointer-events: none;
 }
 
 /* =================================================================
@@ -1222,12 +1200,10 @@ body.is-scrolling .bg-canvas {
 }
 
 @media (max-width: 768px) {
-  /* 移动端减小背景特效强度 */
   .neon-blob {
     opacity: 0.25;
     filter: blur(40px);
   }
-  .bg-canvas { display: none !important; }
   .ember { filter: blur(1px); }
   .flame-base { filter: blur(15px); }
 
