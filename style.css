@@ -236,11 +236,12 @@ select:focus-visible,
 }
 
 .gallery-logo {
+  filter:
   width: 320px;
   max-width: 100%;
   height: auto;
   display: block;
-  filter: drop-shadow(0 0 20px rgba(255, 77, 148, 0.4));
+  filter: invert(1) drop-shadow(0 0 20px rgba(255, 77, 148, 0.4));
   transition: width 0.4s var(--ease-smooth);
 }
 
