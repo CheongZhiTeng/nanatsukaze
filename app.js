@@ -23,7 +23,7 @@ const miniArtist = document.getElementById('miniArtist');
 const miniPlayBtn = document.getElementById('miniPlayBtn');
 const searchInput = document.getElementById('searchInput');
 
-// ===== 提取 YouTube 视频 ID =====
+// ===== Extract YouTube Video ID =====
 function extractVideoId(value) {
   if (!value) return null;
   if (/^[\w-]{11}$/.test(value)) return value;
@@ -47,7 +47,7 @@ function extractVideoId(value) {
   }
 }
 
-// ===== 视图切换 =====
+// ===== View switching =====
 function showGallery() {
   playerView.hidden = true;
   playerView.setAttribute('aria-hidden', 'true');
@@ -66,7 +66,7 @@ function buildThumbUrl(videoId, quality) {
   return 'https://i.ytimg.com/vi/' + videoId + '/' + quality + '.jpg';
 }
 
-// ===== 迷你播放器 =====
+// ===== Mini player =====
 function updateMiniPlayer() {
   const song = songs[currentIndex];
   if (!song) return;
@@ -91,14 +91,14 @@ function hideMiniPlayer() {
   miniPlayer.classList.remove('show');
 }
 
-// ===== 图库 =====
+// ===== Gallery =====
 function renderGallery() {
   const grid = document.getElementById('galleryGrid');
   if (!grid) return;
 
   if (typeof songs === 'undefined' || !Array.isArray(songs)) {
-    grid.innerHTML = '<div class="no-results"><strong>data.js 加载失败</strong>请检查 data.js 是否存在且没有语法错误。</div>';
-    console.error('songs 未定义或不是数组');
+    grid.innerHTML = '<div class="no-results"><strong>data.js failed to load</strong>Check that data.js exists and has no syntax errors.</div>';
+    console.error('songs is not defined or not an array');
     return;
   }
 
@@ -177,9 +177,9 @@ function renderGallery() {
     const msg = document.createElement('div');
     msg.className = 'no-results';
     const strong = document.createElement('strong');
-    strong.textContent = '没有找到歌曲';
+    strong.textContent = 'No songs found';
     msg.appendChild(strong);
-    msg.appendChild(document.createTextNode('请尝试其他搜索关键词。'));
+    msg.appendChild(document.createTextNode('Try a different search term.'));
     grid.appendChild(msg);
   }
 }
@@ -208,8 +208,8 @@ function loadYouTubeAPI() {
 window.onYouTubeIframeAPIReady = function () {
   const firstValid = songs.findIndex(function (s) { return extractVideoId(s.youtubeLink); });
   if (firstValid === -1) {
-    document.getElementById('songTitle').textContent = '没有可播放的歌曲';
-    document.getElementById('songArtist').textContent = '请在 data.js 中添加 YouTube 链接';
+    document.getElementById('songTitle').textContent = 'No playable songs';
+    document.getElementById('songArtist').textContent = 'Add YouTube links in data.js';
     return;
   }
   currentIndex = firstValid;
@@ -239,12 +239,12 @@ function onPlayerReady() {
 }
 
 function onPlayerError(event) {
-  console.warn('YouTube 播放器错误:', event.data);
+  console.warn('YouTube player error:', event.data);
   const song = songs[currentIndex];
   const titleEl = document.getElementById('songTitle');
-  if (titleEl && song) titleEl.textContent = song.title + ' — 无法播放';
+  if (titleEl && song) titleEl.textContent = song.title + ' — unavailable';
   const artistEl = document.getElementById('songArtist');
-  if (artistEl) artistEl.textContent = '跳过中...';
+  if (artistEl) artistEl.textContent = 'Skipping...';
   errorSkipCount++;
   if (errorSkipCount < MAX_ERROR_SKIPS) {
     setTimeout(function () {
@@ -415,8 +415,8 @@ function renderPlaylist() {
     title.textContent = song.title;
     if (!hasLink) {
       const badge = document.createElement('span');
-      badge.style.cssText = 'font-size:0.7rem;color:var(--gray-300);';
-      badge.textContent = ' (无链接)';
+      badge.style.cssText = 'font-size:0.7rem;color:var(--text-dim);';
+      badge.textContent = ' (no link)';
       title.appendChild(badge);
     }
     info.appendChild(title);
@@ -480,9 +480,9 @@ function bindEvents() {
       this.classList.toggle('active', repeatMode !== 'off');
       this.classList.toggle('one', repeatMode === 'one');
       this.setAttribute('aria-pressed', repeatMode !== 'off');
-      this.title = repeatMode === 'one' ? '单曲循环'
-                 : repeatMode === 'all' ? '列表循环'
-                 : '关闭循环';
+      this.title = repeatMode === 'one' ? 'Repeat One'
+                 : repeatMode === 'all' ? 'Repeat All'
+                 : 'Repeat Off';
     });
   }
 
@@ -521,7 +521,6 @@ function bindEvents() {
     });
   }
 
-  // ===== 侧边栏切换 =====
   const playerLayout = document.getElementById('playerLayout');
   const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
   if (toggleSidebarBtn && playerLayout) {
@@ -529,7 +528,7 @@ function bindEvents() {
       const isHidden = playerLayout.classList.toggle('sidebar-hidden');
       this.classList.toggle('collapsed', isHidden);
       this.setAttribute('aria-pressed', isHidden);
-      this.setAttribute('aria-label', isHidden ? '显示侧边栏' : '隐藏侧边栏');
+      this.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
       document.body.classList.toggle('fullscreen-mode', isHidden);
       if (window.bgParticles) {
         if (isHidden) window.bgParticles.stop();
@@ -543,7 +542,7 @@ function bindEvents() {
   });
 }
 
-// ===== 初始化 =====
+// ===== Init =====
 try {
   loadYouTubeAPI();
   bindEvents();
@@ -551,15 +550,15 @@ try {
   renderPlaylist();
   updateSongInfo();
 } catch (err) {
-  console.error('初始化失败:', err);
+  console.error('Init failed:', err);
   const grid = document.getElementById('galleryGrid');
   if (grid) {
-    grid.innerHTML = '<div class="no-results"><strong>脚本错误</strong>' + err.message + '</div>';
+    grid.innerHTML = '<div class="no-results"><strong>Script error</strong>' + err.message + '</div>';
   }
 }
 
 // =================================================================
-// 动态背景 — 修复闪烁和滚动卡顿
+// Animated background — neon particles
 // =================================================================
 (function initBackgroundParticles() {
   const canvas = document.getElementById('bgCanvas');
@@ -567,7 +566,6 @@ try {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.matchMedia('(max-width: 768px)').matches) return;
 
-  // 重要：不使用 desynchronized — 它会导致 iOS 上画面撕裂和闪烁
   const ctx = canvas.getContext('2d', { alpha: true });
 
   let particles = [];
@@ -589,6 +587,9 @@ try {
     for (let dy = -1; dy <= 1; dy++) NEIGHBOR_OFFSETS.push([dx, dy]);
   }
 
+  // 霓虹色相池 — 粉、红、紫
+  const HUES = [335, 350, 280];
+
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
@@ -606,20 +607,17 @@ try {
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
         r: Math.random() * 1.6 + 0.7,
-        hue: [260, 220, 330][(Math.random() * 3) | 0]
+        hue: HUES[(Math.random() * 3) | 0]
       });
     }
   }
 
   function draw(timestamp) {
     if (!running) return;
-
-    // 滚动时跳过绘制 — 把 GPU 让给滚动
     if (paused) {
       rafId = requestAnimationFrame(draw);
       return;
     }
-
     if (timestamp - lastFrameTime < FRAME_INTERVAL) {
       rafId = requestAnimationFrame(draw);
       return;
@@ -674,11 +672,12 @@ try {
       }
     }
 
+    // 连线用霓虹粉
     for (let b = 0; b < ALPHA_BUCKETS; b++) {
       const arr = buckets[b];
       if (!arr.length) continue;
-      const alpha = ((b + 1) / ALPHA_BUCKETS) * 0.15;
-      ctx.strokeStyle = 'hsla(262, 85%, 62%, ' + alpha + ')';
+      const alpha = ((b + 1) / ALPHA_BUCKETS) * 0.2;
+      ctx.strokeStyle = 'hsla(335, 100%, 65%, ' + alpha + ')';
       ctx.lineWidth = 0.8;
       ctx.beginPath();
       for (let k = 0; k < arr.length; k += 4) {
@@ -688,7 +687,8 @@ try {
       ctx.stroke();
     }
 
-    const hueBuckets = { 260: [], 220: [], 330: [] };
+    // 粒子按色相分组批量绘制
+    const hueBuckets = { 335: [], 350: [], 280: [] };
     for (let i = 0; i < particles.length; i++) {
       hueBuckets[particles[i].hue].push(particles[i]);
     }
@@ -701,7 +701,7 @@ try {
         ctx.moveTo(p.x + p.r, p.y);
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       }
-      ctx.fillStyle = 'hsla(' + hue + ', 85%, 62%, 0.55)';
+      ctx.fillStyle = 'hsla(' + hue + ', 100%, 65%, 0.7)';
       ctx.fill();
     }
     rafId = requestAnimationFrame(draw);
@@ -724,7 +724,6 @@ try {
 
   window.bgParticles = { start: start, stop: stop };
 
-  // ==== 滚动时暂停 canvas 以消除卡顿 ====
   let scrollTimer = null;
   window.addEventListener('scroll', function () {
     if (!paused) {
