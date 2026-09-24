@@ -5,33 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nanatsukaze · Music</title>
 
-  <!-- Preconnect to YouTube + Google infrastructure -->
   <link rel="preconnect" href="https://www.youtube.com">
   <link rel="preconnect" href="https://www.youtube-nocookie.com">
-  <link rel="preconnect" href="https://youtubei.googleapis.com">
   <link rel="preconnect" href="https://i.ytimg.com">
-  <link rel="preconnect" href="https://yt3.ggpht.com">
   <link rel="preconnect" href="https://googlevideo.com" crossorigin>
-  <link rel="preconnect" href="https://www.google.com">
-  <link rel="preconnect" href="https://static.doubleclick.net">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <!-- DNS fallback for browsers that skip preconnect -->
   <link rel="dns-prefetch" href="https://www.youtube.com">
-  <link rel="dns-prefetch" href="https://www.youtube-nocookie.com">
   <link rel="dns-prefetch" href="https://i.ytimg.com">
-  <link rel="dns-prefetch" href="https://yt3.ggpht.com">
-  <link rel="dns-prefetch" href="https://googlevideo.com">
 
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Michroma:ital,wght@0,400&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <canvas id="bgCanvas" class="bg-canvas" aria-hidden="true"></canvas>
-  <div class="bg-grid" aria-hidden="true"></div>
+  <!-- ===== 暗黑霓虹液态背景 ===== -->
+  <div class="neon-bg" aria-hidden="true">
+    <div class="neon-blob n1"></div>
+    <div class="neon-blob n2"></div>
+    <div class="neon-blob n3"></div>
+  </div>
 
+  <!-- ===== 粒子网络 ===== -->
+  <canvas id="bgCanvas" class="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- ===== 赛博朋克烈焰 ===== -->
+  <div class="flame-container" aria-hidden="true">
+    <div class="flame-base"></div>
+    <div class="ember e1"></div>
+    <div class="ember e2"></div>
+    <div class="ember e3"></div>
+    <div class="ember e4"></div>
+    <div class="ember e5"></div>
+    <div class="ember e6"></div>
+    <div class="ember e7"></div>
+    <div class="ember e8"></div>
+    <div class="ember e9"></div>
+    <div class="ember e10"></div>
+    <div class="ember e11"></div>
+    <div class="ember e12"></div>
+  </div>
+
+  <!-- ===== Splash ===== -->
   <div id="splash" aria-hidden="true">
     <img src="pictures/logo.png" alt="" class="splash-logo">
   </div>
