@@ -1,14 +1,12 @@
-
-
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=ff4d94,ff3344,a855f7&height=200&section=header&text=Nanatsukaze&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Music%20Gallery%20%26%20Player&descAlignY=58&descSize=20" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&amp;color=ff4d94,ff3344,a855f7&amp;height=200&amp;section=header&amp;text=Nanatsukaze&amp;fontSize=70&amp;fontColor=ffffff&amp;animation=fadeIn&amp;fontAlignY=38&amp;desc=Music%20Gallery%20%26%20Player&amp;descAlignY=58&amp;descSize=20" />
 </div><div align="center">
   <a href="https://git.io/typing-svg">
-    <img src="https://readme-typing-svg.demolab.com?font=Michroma&weight=600&size=22&pause=1000&color=FF4D94&center=true&vCenter=true&width=600&lines=A+stylish+music+gallery+and+player.;Built+with+vanilla+HTML%2C+CSS+%26+JS.;Powered+by+YouTube.;Dark+neon+theme%2C+zero+frameworks." alt="Typing SVG" />
+    <img src="https://readme-typing-svg.demolab.com?font=Michroma&amp;weight=600&amp;size=22&amp;pause=1000&amp;color=FF4D94&amp;center=true&amp;vCenter=true&amp;width=600&amp;lines=A+stylish+music+gallery+and+player.;Built+with+vanilla+HTML%2C+CSS+%26+JS.;Powered+by+YouTube.;Dark+neon+theme%2C+zero+frameworks." alt="Typing SVG" />
   </a>
 </div>
 <div align="center">
-  <img src="https://komarev.com/ghpvc/?username=cheongzhiteng&label=Views&color=ff4d94&style=for-the-badge" alt="Views" />
+  <img src="https://komarev.com/ghpvc/?username=cheongzhiteng&amp;label=Views&amp;color=ff4d94&amp;style=for-the-badge" alt="Views" />
   <img src="https://img.shields.io/badge/version-1.0-ff4d94?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/license-personal%20use-a855f7?style=for-the-badge" alt="License" />
   <img src="https://img.shields.io/badge/status-live-ff3344?style=for-the-badge" alt="Status" />
@@ -17,13 +15,13 @@
   <h3>🔗 Quick Links</h3>
   <br>
   <a href="https://cheongzhiteng.github.io/nanatsukaze">
-    <img src="https://img.shields.io/badge/🎧_Live_Demo-ff4d94?style=for-the-badge&logoColor=white" alt="Live Demo" />
+    <img src="https://img.shields.io/badge/🎧_Live_Demo-ff4d94?style=for-the-badge&amp;logoColor=white" alt="Live Demo" />
   </a>
   <a href="https://github.com/cheongzhiteng/nanatsukaze">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="GitHub" />
   </a>
   <a href="https://youtube.com/@nanatsukaze_">
-    <img src="https://img.shields.io/badge/YouTube-ff3344?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" />
+    <img src="https://img.shields.io/badge/YouTube-ff3344?style=for-the-badge&amp;logo=youtube&amp;logoColor=white" alt="YouTube" />
   </a>
 </div>
 
@@ -129,8 +127,8 @@ Deploy
 
 
 <div align="center">
-  <h2>🎼 Adding Songs</typeh2>
-</div>All song= data lives in data.js. Each entry has three fields:
+  <h2>🎼 Adding Songs</h2>
+</div>All song data lives in data.js. Each entry has three fields:
 
 ```javascript
 { title: "Song Name", artist: "Nanatsukaze", youtubeLink: "https://youtu.be/VIDEO_ID" }
@@ -169,22 +167,22 @@ Esc Close player, return to gallery
 
 <div align="center">
   <h2>📜 Credits</h2>
-</div>· Music — Nanwatsukaze (PIKASONIC × nakot&anmaru)
+</div>· Music — Nanatsukaze (PIKASONIC × nakotanmaru)
 · Font — Michroma by Vernon Adams
-· ffIcons — Custom inline SVGs
+· Icons — Custom inline SVGs
 · Player — YouTube IFrame Player API
 
 Follow Nanatsukaze
 
 <div align="center">
   <a href="https://x.com/Nanatsukaze_ofc">
-    <img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white" alt="X" />
+    <img src="https://img.shields.io/badge/X-000000?style=for-the-badge&amp;logo=x&amp;logoColor=white" alt="X" />
   </a>
   <a href="https://www.instagram.com/nanatsukaze_">
-    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram" />
+    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&amp;logo=instagram&amp;logoColor=white" alt="Instagram" />
   </a>
   <a href="https://youtube.com/@nanatsukaze_">
-    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" />
+    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&amp;logo=youtube&amp;logoColor=white" alt="YouTube" />
   </a>
 </div>
 <div align="center">
@@ -195,8 +193,6 @@ All music, artwork, and trademarks belong to their respective owners — Nanatsu
 
 
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?4d94,ff3344,a855f7&height=120&section=footer" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&amp;color=ff4d94,ff3344,a855f7&amp;height=120&amp;section=footer" />
   <p>Made with 💜 for Nanatsukaze fans</p>
 </div>---
-
-从 <div align="center"> 第一行开始，一直复制到最后的 </div>
