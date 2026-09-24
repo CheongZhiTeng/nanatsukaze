@@ -43,6 +43,7 @@ body {
   overflow-x: hidden;
 }
 
+/* 固定渐变背景 — 强制独立合成层，滚动时不重绘 */
 body::before {
   content: '';
   position: fixed;
@@ -55,6 +56,9 @@ body::before {
     radial-gradient(at 4% 62%,  rgba(59, 130, 246, 0.18) 0px, transparent 45%),
     radial-gradient(at 96% 72%, rgba(251, 191, 36, 0.14) 0px, transparent 45%),
     radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.14) 0px, transparent 50%);
+  contain: strict;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 body.player-open { overflow: hidden; }
@@ -146,7 +150,7 @@ input:focus-visible,
   transition: width 0.4s var(--ease-smooth);
 }
 
-/* SEARCH */
+/* 搜索框 — 实心背景，无 backdrop-filter */
 .search-wrap {
   position: relative;
   display: flex;
@@ -171,10 +175,8 @@ input:focus-visible,
   height: 46px;
   padding: 0 18px 0 46px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--gray-700);
   font-size: 0.88rem;
   font-family: inherit;
@@ -220,7 +222,7 @@ input:focus-visible,
   letter-spacing: 0.02em;
 }
 
-/* SOCIAL */
+/* 社交按钮 — 实心背景，无 backdrop-filter */
 .social-links {
   display: flex;
   align-items: center;
@@ -236,10 +238,8 @@ input:focus-visible,
   align-items: center;
   justify-content: center;
   color: var(--gray-600);
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
   text-decoration: none;
   transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease,
@@ -928,7 +928,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 
-/* DISABLE ALL EFFECTS IN FULLSCREEN */
+/* 全屏模式关闭所有效果 */
 body.fullscreen-mode .bg-canvas {
   display: none !important;
 }
@@ -964,16 +964,23 @@ body.fullscreen-mode .toggle-sidebar-btn:hover {
   box-shadow: none;
 }
 
-/* MINI PLAYER */
+/* ==== 滚动性能优化：滚动时暂停动画 ==== */
+body.is-scrolling .bg-grid {
+  animation-play-state: paused !important;
+}
+
+body.is-scrolling .bg-canvas {
+  pointer-events: none;
+}
+
+/* MINI PLAYER — 实心背景，无 backdrop-filter */
 .mini-player {
   position: fixed;
   bottom: 24px;
   right: 24px;
   width: 360px;
   max-width: calc(100vw - 48px);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 14px;
   padding: 10px 12px;
   display: flex;
@@ -1083,6 +1090,8 @@ body.fullscreen-mode .toggle-sidebar-btn:hover {
   z-index: -1;
   pointer-events: none;
   display: block;
+  contain: strict;
+  transform: translateZ(0);
 }
 
 .bg-grid {
@@ -1100,6 +1109,9 @@ body.fullscreen-mode .toggle-sidebar-btn:hover {
   animation: gridDrift 24s linear infinite;
   -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
   mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%);
+  contain: strict;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 @keyframes gridDrift {
@@ -1225,7 +1237,7 @@ body.fullscreen-mode .toggle-sidebar-btn:hover {
   .mini-cover { width: 44px; height: 44px; }
   .mini-play-btn { width: 40px; height: 40px; }
 
-  /* ==== Sidebar toggle — stay visible on mobile, just repositioned ==== */
+  /* 侧边栏按钮 — 移动端保持可见 */
   .toggle-sidebar-btn {
     top: 12px;
     right: 12px;
