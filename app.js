@@ -23,7 +23,7 @@ const miniArtist = document.getElementById('miniArtist');
 const miniPlayBtn = document.getElementById('miniPlayBtn');
 const searchInput = document.getElementById('searchInput');
 
-// ===== Extract YouTube Video ID =====
+// ===== 提取 YouTube 视频 ID =====
 function extractVideoId(value) {
   if (!value) return null;
   if (/^[\w-]{11}$/.test(value)) return value;
@@ -47,7 +47,7 @@ function extractVideoId(value) {
   }
 }
 
-// ===== View switching =====
+// ===== 视图切换 =====
 function showGallery() {
   playerView.hidden = true;
   playerView.setAttribute('aria-hidden', 'true');
@@ -66,7 +66,7 @@ function buildThumbUrl(videoId, quality) {
   return 'https://i.ytimg.com/vi/' + videoId + '/' + quality + '.jpg';
 }
 
-// ===== Mini player =====
+// ===== 迷你播放器 =====
 function updateMiniPlayer() {
   const song = songs[currentIndex];
   if (!song) return;
@@ -91,14 +91,14 @@ function hideMiniPlayer() {
   miniPlayer.classList.remove('show');
 }
 
-// ===== Gallery =====
+// ===== 图库 =====
 function renderGallery() {
   const grid = document.getElementById('galleryGrid');
   if (!grid) return;
 
   if (typeof songs === 'undefined' || !Array.isArray(songs)) {
-    grid.innerHTML = '<div class="no-results"><strong>data.js failed to load</strong>Check that data.js exists and has no syntax errors.</div>';
-    console.error('songs is not defined or not an array');
+    grid.innerHTML = '<div class="no-results"><strong>data.js 加载失败</strong>请检查 data.js 是否存在且没有语法错误。</div>';
+    console.error('songs 未定义或不是数组');
     return;
   }
 
@@ -177,9 +177,9 @@ function renderGallery() {
     const msg = document.createElement('div');
     msg.className = 'no-results';
     const strong = document.createElement('strong');
-    strong.textContent = 'No songs found';
+    strong.textContent = '没有找到歌曲';
     msg.appendChild(strong);
-    msg.appendChild(document.createTextNode('Try a different search term.'));
+    msg.appendChild(document.createTextNode('请尝试其他搜索关键词。'));
     grid.appendChild(msg);
   }
 }
@@ -208,8 +208,8 @@ function loadYouTubeAPI() {
 window.onYouTubeIframeAPIReady = function () {
   const firstValid = songs.findIndex(function (s) { return extractVideoId(s.youtubeLink); });
   if (firstValid === -1) {
-    document.getElementById('songTitle').textContent = 'No playable songs';
-    document.getElementById('songArtist').textContent = 'Add YouTube links in data.js';
+    document.getElementById('songTitle').textContent = '没有可播放的歌曲';
+    document.getElementById('songArtist').textContent = '请在 data.js 中添加 YouTube 链接';
     return;
   }
   currentIndex = firstValid;
@@ -239,12 +239,12 @@ function onPlayerReady() {
 }
 
 function onPlayerError(event) {
-  console.warn('YouTube player error:', event.data);
+  console.warn('YouTube 播放器错误:', event.data);
   const song = songs[currentIndex];
   const titleEl = document.getElementById('songTitle');
-  if (titleEl && song) titleEl.textContent = song.title + ' — unavailable';
+  if (titleEl && song) titleEl.textContent = song.title + ' — 无法播放';
   const artistEl = document.getElementById('songArtist');
-  if (artistEl) artistEl.textContent = 'Skipping...';
+  if (artistEl) artistEl.textContent = '跳过中...';
   errorSkipCount++;
   if (errorSkipCount < MAX_ERROR_SKIPS) {
     setTimeout(function () {
@@ -416,7 +416,7 @@ function renderPlaylist() {
     if (!hasLink) {
       const badge = document.createElement('span');
       badge.style.cssText = 'font-size:0.7rem;color:var(--gray-300);';
-      badge.textContent = ' (no link)';
+      badge.textContent = ' (无链接)';
       title.appendChild(badge);
     }
     info.appendChild(title);
@@ -480,9 +480,9 @@ function bindEvents() {
       this.classList.toggle('active', repeatMode !== 'off');
       this.classList.toggle('one', repeatMode === 'one');
       this.setAttribute('aria-pressed', repeatMode !== 'off');
-      this.title = repeatMode === 'one' ? 'Repeat One'
-                 : repeatMode === 'all' ? 'Repeat All'
-                 : 'Repeat Off';
+      this.title = repeatMode === 'one' ? '单曲循环'
+                 : repeatMode === 'all' ? '列表循环'
+                 : '关闭循环';
     });
   }
 
@@ -521,7 +521,7 @@ function bindEvents() {
     });
   }
 
-  // ===== Sidebar toggle — also toggles fullscreen-mode on body =====
+  // ===== 侧边栏切换 =====
   const playerLayout = document.getElementById('playerLayout');
   const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
   if (toggleSidebarBtn && playerLayout) {
@@ -529,11 +529,8 @@ function bindEvents() {
       const isHidden = playerLayout.classList.toggle('sidebar-hidden');
       this.classList.toggle('collapsed', isHidden);
       this.setAttribute('aria-pressed', isHidden);
-      this.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
-
-      // Disable ALL effects (particles, grid, blurs, shadows) in fullscreen
+      this.setAttribute('aria-label', isHidden ? '显示侧边栏' : '隐藏侧边栏');
       document.body.classList.toggle('fullscreen-mode', isHidden);
-
       if (window.bgParticles) {
         if (isHidden) window.bgParticles.stop();
         else window.bgParticles.start();
@@ -546,7 +543,7 @@ function bindEvents() {
   });
 }
 
-// ===== Init =====
+// ===== 初始化 =====
 try {
   loadYouTubeAPI();
   bindEvents();
@@ -554,25 +551,30 @@ try {
   renderPlaylist();
   updateSongInfo();
 } catch (err) {
-  console.error('Init failed:', err);
+  console.error('初始化失败:', err);
   const grid = document.getElementById('galleryGrid');
   if (grid) {
-    grid.innerHTML = '<div class="no-results"><strong>Script error</strong>' + err.message + '</div>';
+    grid.innerHTML = '<div class="no-results"><strong>脚本错误</strong>' + err.message + '</div>';
   }
 }
 
-// ===== Animated background =====
+// =================================================================
+// 动态背景 — 修复闪烁和滚动卡顿
+// =================================================================
 (function initBackgroundParticles() {
   const canvas = document.getElementById('bgCanvas');
   if (!canvas) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.matchMedia('(max-width: 768px)').matches) return;
 
-  const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+  // 重要：不使用 desynchronized — 它会导致 iOS 上画面撕裂和闪烁
+  const ctx = canvas.getContext('2d', { alpha: true });
+
   let particles = [];
   let w = 0, h = 0, dpr = 1;
   let rafId = null;
   let running = false;
+  let paused = false;
   let lastFrameTime = 0;
   let lastTimestamp = 0;
 
@@ -611,6 +613,13 @@ try {
 
   function draw(timestamp) {
     if (!running) return;
+
+    // 滚动时跳过绘制 — 把 GPU 让给滚动
+    if (paused) {
+      rafId = requestAnimationFrame(draw);
+      return;
+    }
+
     if (timestamp - lastFrameTime < FRAME_INTERVAL) {
       rafId = requestAnimationFrame(draw);
       return;
@@ -700,7 +709,6 @@ try {
 
   function start() {
     if (running) return;
-    // Don't restart if we're in fullscreen mode
     if (document.body.classList.contains('fullscreen-mode')) return;
     running = true;
     lastFrameTime = 0;
@@ -715,6 +723,22 @@ try {
   }
 
   window.bgParticles = { start: start, stop: stop };
+
+  // ==== 滚动时暂停 canvas 以消除卡顿 ====
+  let scrollTimer = null;
+  window.addEventListener('scroll', function () {
+    if (!paused) {
+      paused = true;
+      document.body.classList.add('is-scrolling');
+    }
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () {
+      paused = false;
+      lastFrameTime = 0;
+      lastTimestamp = 0;
+      document.body.classList.remove('is-scrolling');
+    }, 150);
+  }, { passive: true });
 
   let resizeTimer = null;
   window.addEventListener('resize', function () {
