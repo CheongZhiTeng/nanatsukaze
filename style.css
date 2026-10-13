@@ -8,17 +8,20 @@
 }
 
 :root {
+  /* 暗黑冰冷主题基础色 */
   --bg-base: #0a0e14;
   --bg-card: rgba(18, 26, 36, 0.85);
   --bg-input: rgba(12, 18, 26, 0.9);
   --bg-elevated: rgba(28, 38, 48, 0.9);
 
+  /* 霓虹强调色（提取自壁纸） */
   --accent-cyan: #22d3ee;
   --accent-blue: #3b82f6;
   --accent-red: #ef4444;
   --accent-purple: #8b5cf6;
   --accent-white: #ffffff;
 
+  /* 文字颜色 */
   --text-main: #e2e8f0;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
@@ -58,7 +61,7 @@ select:focus-visible,
 }
 
 /* =================================================================
-   暗黑霓虹液态背景 (Updated to Icy/Teal)
+   暗黑霓虹液态背景
    ================================================================= */
 .neon-bg {
   position: fixed;
@@ -81,7 +84,7 @@ select:focus-visible,
 }
 
 .n1 { background: var(--accent-cyan); top: -15vmax; left: -10vmax; animation-delay: 0s; }
-.n2 { background: var(--accent-purple); bottom: -15vmax; right: -10vmax; animation-delay: -7s; }
+.n2 { background: var(--accent-blue); bottom: -15vmax; right: -10vmax; animation-delay: -7s; }
 .n3 { background: var(--accent-red); top: 30vmax; left: 40vmax; animation-delay: -14s; }
 
 @keyframes neonMove {
@@ -96,7 +99,7 @@ select:focus-visible,
 }
 
 /* =================================================================
-   赛博朋克烈焰 (Updated to Ice/Cyan Energy)
+   赛博朋克烈焰（已调整为冰蓝冷焰）
    ================================================================= */
 .flame-container {
   position: fixed;
@@ -116,6 +119,7 @@ select:focus-visible,
   transform: translateX(-50%);
   width: 120%;
   height: 200px;
+  /* 冰蓝与青色光晕 */
   background: radial-gradient(ellipse at bottom,
     rgba(34, 211, 238, 0.4) 0%,
     rgba(59, 130, 246, 0.2) 30%,
@@ -144,13 +148,13 @@ select:focus-visible,
 .ember.e1  { left: 5%;  width: 8px;  height: 10px; background: var(--accent-cyan);   box-shadow: 0 0 12px 2px var(--accent-cyan);   animation-delay: 0s;   animation-duration: 4s; }
 .ember.e2  { left: 15%; width: 6px;  height: 8px;  background: var(--accent-red);    box-shadow: 0 0 10px 2px var(--accent-red);    animation-delay: 1.5s; animation-duration: 3.5s; }
 .ember.e3  { left: 25%; width: 10px; height: 12px; background: var(--accent-white);  box-shadow: 0 0 15px 3px var(--accent-white);   animation-delay: 0.8s; animation-duration: 5s; }
-.ember.e4  { left: 35%; width: 5px;  height: 7px;  background: var(--accent-cyan);   box-shadow: 0 0 8px 2px var(--accent-cyan);    animation-delay: 2.5s; animation-duration: 3s; }
+.ember.e4  { left: 35%; width: 5px;  height: 7px;  background: var(--accent-blue);   box-shadow: 0 0 8px 2px var(--accent-blue);    animation-delay: 2.5s; animation-duration: 3s; }
 .ember.e5  { left: 45%; width: 9px;  height: 11px; background: var(--accent-red);    box-shadow: 0 0 12px 3px var(--accent-red);    animation-delay: 0.3s; animation-duration: 4.5s; }
 .ember.e6  { left: 55%; width: 7px;  height: 9px;  background: var(--accent-cyan);   box-shadow: 0 0 10px 2px var(--accent-cyan);   animation-delay: 1.2s; animation-duration: 3.8s; }
 .ember.e7  { left: 65%; width: 11px; height: 14px; background: var(--accent-white);  box-shadow: 0 0 18px 4px var(--accent-white);  animation-delay: 3s;   animation-duration: 5.5s; }
 .ember.e8  { left: 75%; width: 6px;  height: 8px;  background: var(--accent-red);    box-shadow: 0 0 10px 2px var(--accent-red);    animation-delay: 0.5s; animation-duration: 4.2s; }
 .ember.e9  { left: 85%; width: 8px;  height: 10px; background: var(--accent-cyan);   box-shadow: 0 0 12px 2px var(--accent-cyan);   animation-delay: 2s;   animation-duration: 3.2s; }
-.ember.e10 { left: 95%; width: 5px;  height: 6px;  background: var(--accent-red);    box-shadow: 0 0 8px 1px var(--accent-red);     animation-delay: 1.8s; animation-duration: 4.8s; }
+.ember.e10 { left: 95%; width: 5px;  height: 6px;  background: var(--accent-blue);   box-shadow: 0 0 8px 1px var(--accent-blue);    animation-delay: 1.8s; animation-duration: 4.8s; }
 .ember.e11 { left: 50%; width: 12px; height: 15px; background: var(--accent-white);  box-shadow: 0 0 20px 5px var(--accent-white);  animation-delay: 0.1s; animation-duration: 6s; }
 .ember.e12 { left: 20%; width: 7px;  height: 9px;  background: var(--accent-cyan);   box-shadow: 0 0 12px 2px var(--accent-cyan);   animation-delay: 3.5s; animation-duration: 4s; }
 
